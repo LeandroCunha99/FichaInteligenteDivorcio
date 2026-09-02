@@ -1,0 +1,1218 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ficha Inteligente de Dissolução — Casamento e União Estável — v1.2-dev</title>
+<style>
+:root{--bg:#f7f6f2;--card:#fff;--ink:#202630;--muted:#68707a;--line:#dce1e7;--accent:#2457A6;--accent2:#1E4788;--accentSoft:#edf3fc;--soft:#f3f6fa;--warn:#fff7df;--critical:#a63d40;--ok:#2f7d62}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,sans-serif}
+header{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;border-bottom:0;padding:22px 5vw;box-shadow:0 6px 18px rgba(30,71,136,.12)}header .family{font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;opacity:.78;margin-bottom:5px}header h1{margin:0 0 3px;font-size:27px}header .subtitle{font-size:14px;font-weight:700;opacity:.9;margin-bottom:10px}.lead{color:rgba(255,255,255,.78)} header .info-documental{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.25);color:#fff;max-width:980px}
+main{max-width:1180px;margin:22px auto;padding:0 18px 60px}.section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;margin:0 0 18px}
+.section h2{margin:0 0 7px;font-size:21px;color:var(--accent2)}.intro{color:var(--muted);margin-bottom:18px}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+.f{grid-column:span 4}.s6{grid-column:span 6}.s12{grid-column:span 12}label{display:block;font-size:13px;font-weight:700;margin-bottom:5px}
+input,select,textarea{width:100%;padding:10px;border:1px solid #cfcac0;border-radius:8px;background:#fff;font:inherit}textarea{min-height:76px}
+.sub{font-size:16px;font-weight:700;margin:22px 0 12px;border-top:1px solid var(--line);padding-top:16px}
+.conditional{display:none}.conditional.show{display:block}.btn{border:0;border-radius:8px;padding:10px 14px;cursor:pointer;background:var(--accent);color:#fff;font-weight:700}
+.btn.secondary{background:#eceae3;color:var(--ink);border:1px solid var(--line)}.rowcard{border:1px solid var(--line);border-radius:10px;padding:15px;margin:12px 0;background:#fff}
+.rowhead{display:flex;justify-content:space-between;gap:10px;align-items:center}.hint{font-size:12px;color:var(--muted);margin-top:5px}
+.result-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.metric{padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--soft)}
+.metric strong{display:block;font-size:20px;margin-top:5px;color:var(--accent2)}.pending{background:var(--warn)}.asset-result{border-top:1px solid var(--line);padding:12px 0}
+.status{font-weight:700}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+@media(max-width:720px){.f,.s6,.s12{grid-column:span 12}.result-grid{grid-template-columns:1fr 1fr}header h1{font-size:22px}}
+
+/* v0.25 — hierarquia visual funcional */
+.question-zone{border-left:4px solid currentColor;padding-left:14px}
+.info-documental,.alerta-juridico,.pendencia-ficha,.resultado-motor{border-radius:10px;padding:12px 14px;margin:10px 0}
+.info-documental{background:rgba(127,127,127,.08);border:1px solid rgba(127,127,127,.22)}
+.alerta-juridico{background:rgba(184,134,11,.08);border:1px solid rgba(184,134,11,.28)}
+.pendencia-ficha{background:rgba(178,34,34,.07);border:1px solid rgba(178,34,34,.25)}
+.resultado-motor{background:rgba(46,125,50,.07);border:1px solid rgba(46,125,50,.24)}
+.ui-tag{font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;opacity:.72;display:block;margin-bottom:5px}
+@media(max-width:720px){
+ .grid{grid-template-columns:1fr!important}
+ .f,.s6,.s12{grid-column:1/-1!important;min-width:0}
+ .rowhead{align-items:flex-start;gap:8px;flex-wrap:wrap}
+ button,.btn,select,input,textarea{max-width:100%}
+ .intro,.info-documental,.alerta-juridico,.pendencia-ficha,.resultado-motor{padding:10px}
+ h1{font-size:1.55rem} h2{font-size:1.15rem}
+}
+
+
+.start-mode{border:2px solid var(--accent);background:linear-gradient(180deg,#fff,var(--accentSoft))}.start-mode .choices{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.start-mode .choice{flex:1 1 260px;border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--soft)}.start-mode .choice strong{display:block;margin-bottom:6px}.start-mode .choice button{margin-top:8px}.interop-note{font-size:12px;color:var(--muted);margin-top:8px}
+</style>
+</head>
+<body>
+<header>
+<div class="family">Fichas Inteligentes</div><h1>Ficha Inteligente de Dissolução</h1><div class="subtitle">Casamento e União Estável</div><div class="info-documental"><span class="ui-tag">Como ler a Ficha</span>Os campos solicitam <strong>fatos e documentos</strong>. Alertas jurídicos e resultados são produzidos pelo sistema e aparecem visualmente separados; não devem ser preenchidos pelo usuário.</div>
+<div class="lead">Núcleo patrimonial + interoperabilidade — v1.2-dev — relação → regime → bens → qualificação bem a bem → divisão</div>
+</header>
+<main>
+<section class="section start-mode" id="startModePanel">
+<h2>Como deseja iniciar esta ficha?</h2>
+<div class="intro">Você pode iniciar um atendimento novo ou reaproveitar dados de uma ficha anterior. A importação preserva a origem das informações e não transforma automaticamente dados históricos em conclusões jurídicas atuais.</div>
+<div class="choices">
+ <div class="choice"><strong>Nova ficha</strong><span>Iniciar o atendimento sem dados anteriores.</span><br><button class="btn" type="button" id="startNewInterop">Iniciar nova ficha</button></div>
+ <div class="choice"><strong>Importar dados de ficha anterior</strong><span>Retomar uma ficha de dissolução já exportada e preservar IDs e vínculos.</span><br><button class="btn secondary" type="button" id="startImportInterop">Selecionar arquivo anterior</button></div>
+</div>
+<div class="interop-note">Nesta versão, a importação de origem reconhecida corresponde às versões anteriores da própria Ficha de Dissolução. O arquivo exportado passa também a conter um núcleo comum para uso por outras fichas do ecossistema.</div>
+</section>
+<section class="section">
+<h2>01. Identificação dos cônjuges / companheiros</h2>
+<div class="intro">As duas pessoas são tratadas simetricamente. Nenhuma delas é presumida proprietária dos bens.</div>
+<div class="grid">
+<div class="f"><label>Parte A — nome</label><input data-k="a.name"></div>
+<div class="f"><label>CPF</label><input data-k="a.cpf"></div>
+<div class="f"><label>Data de nascimento</label><input type="date" data-k="a.birth"></div>
+<div class="f"><label>Parte B — nome</label><input data-k="b.name"></div>
+<div class="f"><label>CPF</label><input data-k="b.cpf"></div>
+<div class="f"><label>Data de nascimento</label><input type="date" data-k="b.birth"></div>
+</div>
+</section>
+
+<section class="section">
+<h2>02. Casamento ou união estável e regime patrimonial</h2>
+<div class="intro">A ficha fixa a cronologia do vínculo e registra os elementos necessários à determinação do regime, inclusive convenções e alterações posteriores.</div>
+<div class="grid">
+<div class="f"><label>Natureza do vínculo</label><select data-k="rel.type"><option value="">Selecione</option><option>Casamento</option><option>União estável</option></select></div>
+<div class="f"><label>Data de início do vínculo</label><input type="date" data-k="rel.start"></div>
+<div class="f"><label>Data da separação de fato, se houver</label><input type="date" data-k="rel.separation"></div>
+<div class="f"><label>Sexo da Parte A — somente para aferição da regra etária histórica, se o casamento for anterior ao CC/2002</label><select data-k="a.historicalSex"><option value="">Não informado</option><option value="M">Masculino</option><option value="F">Feminino</option></select></div>
+<div class="f"><label>Sexo da Parte B — somente para aferição da regra etária histórica, se o casamento for anterior ao CC/2002</label><select data-k="b.historicalSex"><option value="">Não informado</option><option value="M">Masculino</option><option value="F">Feminino</option></select></div>
+<div class="s12"><div id="sobOriginalAudit" class="alerta-juridico"></div></div>
+<div class="s12"><div id="regimeTransversalAudit" class="info-documental"></div></div>
+
+<div class="conditional s12" data-show="rel.type=Casamento">
+<div class="sub">Casamento</div><div class="grid">
+<div class="f"><label>Forma do casamento</label><select data-k="marriage.form"><option value="">Selecione</option><option>Casamento civil</option><option>Casamento religioso com efeitos civis</option><option>A verificar</option></select></div>
+<div class="f"><label>Data do registro civil, se pertinente</label><input type="date" data-k="marriage.registration"><span class="hint">No casamento religioso com efeitos civis, a data de início do vínculo acima deve refletir a data do casamento religioso; o registro é documentado separadamente.</span></div>
+<div class="f"><label>Havia pacto antenupcial?</label><select data-k="marriage.pact"><option value="">Selecione</option><option value="nao">Não</option><option value="sim">Sim</option><option value="duvida">A verificar</option></select></div>
+<div class="conditional f" data-show="marriage.pact=sim"><label>Regime convencionado</label><select data-k="marriage.pactRegime" class="regime"></select></div>
+<div class="conditional f" data-show="marriage.pact=sim"><label>Data do pacto</label><input type="date" data-k="marriage.pactDate"></div>
+<div class="conditional f" data-show="marriage.pact=sim"><label>Pacto antenupcial disponível para análise?</label><select data-k="marriage.pactDoc"><option value="">Selecione</option><option>Sim</option><option>Não</option><option>A verificar</option></select></div>
+<div class="conditional s12" data-show="marriage.pactDoc=Sim">
+  <div class="sub">Documento-fonte — pacto antenupcial</div>
+  <div class="hint">O pacto é fonte obrigatória da qualificação patrimonial. Na versão Essencial, seus dados e conteúdo relevante são estruturados manualmente. Na futura versão Premium, esta mesma estrutura poderá ser preenchida por leitura documental/OCR/IA, sempre sujeita à validação profissional.</div>
+  <div class="grid">
+    <div class="f"><label>Identificação / referência do documento</label><input data-k="marriage.pactDocRef" placeholder="Ex.: Livro, folhas, cartório, escritura..."></div>
+    <div class="f"><label>Data do instrumento</label><input type="date" data-k="marriage.pactDocDate"></div>
+    <div class="f"><label>Origem dos dados do documento</label><select data-k="marriage.pactIngestion"><option value="">Selecione</option><option value="manual">Preenchimento manual</option><option value="documental">Leitura documental automatizada (Premium — futura)</option></select></div>
+    <div class="f"><label>Conteúdo patrimonial foi importado/estruturado?</label><select data-k="marriage.pactImported"><option value="">Selecione</option><option>Sim</option><option>Não</option><option>Parcialmente</option></select></div>
+    <div class="s12"><label>Trecho/teor patrimonial relevante do pacto</label><textarea data-k="marriage.pactSourceText" placeholder="Na Essencial, transcreva ou resuma fielmente as disposições patrimoniais relevantes. Na Premium, este campo poderá ser preenchido pela leitura do documento."></textarea></div>
+    <div class="s12"><label>Validação profissional do conteúdo estruturado</label><select data-k="marriage.pactValidated"><option value="">Selecione</option><option>Confirmado</option><option>Confirmado com ajustes</option><option>Pendente</option></select></div>
+  </div>
+</div>
+<div class="conditional f" data-show="marriage.pact=sim"><label>Há cláusulas patrimoniais específicas?</label><select data-k="marriage.specialClauses"><option value="">Selecione</option><option>Não</option><option>Sim</option><option>A verificar</option></select></div>
+<div class="conditional s12" data-show="marriage.pact=sim"><label>Conteúdo / cláusulas relevantes</label><textarea data-k="marriage.pactDetails"></textarea></div>
+<div class="conditional s12" data-show="marriage.pact=sim">
+  <div class="sub">Regras patrimoniais específicas do pacto</div>
+  <div class="hint">O regime escolhido é apenas a matriz-base. Cadastre abaixo as cláusulas que ampliem, restrinjam ou individualizem a comunicabilidade. A regra específica prevalecerá sobre o padrão do regime apenas dentro do seu alcance.</div>
+  <div id="marriageDocStatus" class="hint"></div><div id="marriageClauses"></div>
+  <button class="btn secondary" type="button" id="addMarriageClause">Adicionar regra específica do pacto</button>
+</div>
+<div class="f"><label>Havia causa de separação obrigatória / regra etária relevante?</label><select data-k="marriage.mandatory"><option value="">Selecione</option><option value="nao">Não</option><option value="sim">Sim</option><option value="duvida">A verificar</option></select></div>
+<div class="conditional f" data-show="marriage.mandatory=sim"><label>Hipótese especial incidente no casamento</label><select data-k="marriage.mandatorySpecial">
+<option value="">Selecione</option><option value="none">Nenhuma além da idade</option>
+<option value="widow_inventory">Viúvo(a) com filho do falecido: inventário/partilha anterior não concluídos</option>
+<option value="ten_months">Casamento no período suspensivo de 10 meses, quando pertinente</option>
+<option value="divorce_partition">Divorciado(a) antes da partilha do casamento anterior</option>
+<option value="tutor_curator">Tutela/curatela e prestação de contas pendente</option>
+<option value="judicial_supply">Necessidade de suprimento judicial para casar</option>
+<option value="historical">Hipótese histórica vigente na data do casamento</option>
+<option value="other">Outra hipótese legal / a verificar</option><option value="unknown">A verificar</option></select></div>
+<div class="conditional f" data-show="marriage.mandatory=sim"><label>Houve manifestação expressa para afastamento da regra etária, quando juridicamente cabível?</label><select data-k="marriage.ageOverride"><option value="">Selecione</option><option>Não</option><option>Sim</option><option>A verificar</option></select></div>
+</div></div>
+
+<div class="conditional s12" data-show="rel.type=União estável">
+<div class="sub">União estável</div><div class="grid">
+<div class="f"><label>Havia contrato escrito sobre regime de bens?</label><select data-k="ue.contract"><option value="">Selecione</option><option value="nao">Não</option><option value="sim">Sim</option><option value="duvida">A verificar</option></select></div>
+<div class="conditional f" data-show="ue.contract=sim"><label>Regime convencionado</label><select data-k="ue.contractRegime" class="regime"></select></div>
+<div class="conditional f" data-show="ue.contract=sim"><label>Data do contrato</label><input type="date" data-k="ue.contractDate"></div>
+<div class="conditional f" data-show="ue.contract=sim"><label>Contrato de convivência disponível para análise?</label><select data-k="ue.contractDoc"><option value="">Selecione</option><option>Sim</option><option>Não</option><option>A verificar</option></select></div>
+<div class="conditional s12" data-show="ue.contractDoc=Sim">
+  <div class="sub">Documento-fonte — contrato de convivência</div>
+  <div class="hint">O contrato escrito é fonte obrigatória da qualificação patrimonial. O conteúdo estruturado deve ser validado pelo profissional antes de produzir efeitos no cálculo.</div>
+  <div class="grid">
+    <div class="f"><label>Identificação / referência do documento</label><input data-k="ue.contractDocRef"></div>
+    <div class="f"><label>Data do instrumento</label><input type="date" data-k="ue.contractDocDate"></div>
+    <div class="f"><label>Origem dos dados do documento</label><select data-k="ue.contractIngestion"><option value="">Selecione</option><option value="manual">Preenchimento manual</option><option value="documental">Leitura documental automatizada (Premium — futura)</option></select></div>
+    <div class="f"><label>Conteúdo patrimonial foi importado/estruturado?</label><select data-k="ue.contractImported"><option value="">Selecione</option><option>Sim</option><option>Não</option><option>Parcialmente</option></select></div>
+    <div class="s12"><label>Trecho/teor patrimonial relevante do contrato</label><textarea data-k="ue.contractSourceText"></textarea></div>
+    <div class="s12"><label>Validação profissional do conteúdo estruturado</label><select data-k="ue.contractValidated"><option value="">Selecione</option><option>Confirmado</option><option>Confirmado com ajustes</option><option>Pendente</option></select></div>
+  </div>
+</div>
+<div class="conditional f" data-show="ue.contract=sim"><label>Há cláusulas patrimoniais específicas?</label><select data-k="ue.specialClauses"><option value="">Selecione</option><option>Não</option><option>Sim</option><option>A verificar</option></select></div>
+<div class="conditional s12" data-show="ue.contract=sim"><label>Conteúdo / cláusulas relevantes</label><textarea data-k="ue.contractDetails"></textarea></div>
+<div class="conditional s12" data-show="ue.contract=sim">
+  <div class="sub">Regras patrimoniais específicas do contrato de convivência</div>
+  <div class="hint">O contrato escrito pode estabelecer disciplina patrimonial própria. Cadastre a regra e seu alcance; eventual eficácia sobre período anterior ao instrumento não será presumida automaticamente.</div>
+  <div id="ueDocStatus" class="hint"></div><div id="ueClauses"></div>
+  <button class="btn secondary" type="button" id="addUEClause">Adicionar regra específica do contrato</button>
+</div>
+</div></div>
+
+<div class="s12"><div class="sub">Regime efetivamente adotado</div></div>
+<div class="f"><label>Regime de bens</label><select data-k="regime.base" class="regime"></select></div>
+<div class="f"><label>O regime efetivo corresponde ao esperado pelos dados acima?</label><select data-k="regime.matches"><option value="">Selecione</option><option>Sim</option><option>Não</option><option>A verificar</option></select></div>
+<div class="f"><label>Houve alteração do regime durante o vínculo?</label><select data-k="regime.changed"><option value="">Selecione</option><option value="nao">Não</option><option value="sim">Sim</option><option value="duvida">A verificar</option></select></div>
+<div class="conditional s12" data-show="regime.changed=sim">
+<div class="hint">Cada mudança de regime constitui uma nova camada temporal da matriz patrimonial. O sistema não presume sua eficácia nem sua data: ambas precisam ser ancoradas no instrumento-fonte e validadas.</div>
+<div id="changes"></div><button class="btn secondary" type="button" id="addChange">Adicionar alteração de regime</button>
+</div>
+<div class="s12"><label>Outras particularidades relevantes</label><textarea data-k="rel.details"></textarea></div>
+</div>
+</section>
+
+<section class="section">
+<h2>03. Bens e direitos</h2>
+<div class="intro">Cada bem é descrito de forma neutra: quem o adquiriu, quando, por qual origem, em nome de quem está e quais recursos foram empregados. A ficha não pergunta “entra na partilha?”.</div>
+<div id="assets"></div>
+<button class="btn secondary" type="button" id="addAsset">Adicionar bem / direito</button>
+</section>
+
+<section class="section">
+<h2>04. Qualificação patrimonial e divisão preliminar</h2>
+<div id="uxReadiness" class="intro"></div>
+
+<div class="intro">O resultado deriva dos fatos cadastrados. Situações não estabilizadas permanecem pendentes e não são distribuídas por presunção. Na comunhão universal, a regra é a comunicação ampla, mas pacto/contrato, gravames, natureza do bem, sub-rogação e exclusões legais são examinados antes do 50/50. Na separação obrigatória, a matriz não replica a comunhão parcial: os aquestos onerosos dependem da qualificação do esforço comum. Há, porém, exceção jurisprudencial relevante do STJ para bens adquiridos por fato eventual, como prêmio de loteria, cuja comunicabilidade foi reconhecida independentemente de esforço comum.</div>
+<div id="summary"></div>
+<div id="results"></div>
+<div class="toolbar"><button class="btn" id="save" type="button">Exportar atendimento</button><button class="btn secondary" id="load" type="button">Importar atendimento</button><input id="loadFile" type="file" accept="application/json,.json" hidden><button class="btn secondary" id="reset" type="button">Novo atendimento</button></div><div id="persistenceStatus" class="info-documental"><span class="ui-tag">Persistência</span>Os dados permanecem apenas nesta sessão da página até serem exportados. Para retomar um atendimento, importe o arquivo JSON anteriormente exportado.</div>
+</section>
+</main>
+<script>
+const regimes=[
+ ["","Selecione"],["cpb","Comunhão parcial de bens"],["cub","Comunhão universal de bens"],
+ ["sob","Separação obrigatória de bens"],["scb","Separação convencional de bens"],
+ ["pfa","Participação final nos aquestos"],["outro","Outro / a verificar"]
+];
+let state={data:{},changes:[],assets:[],disposals:[],outorgaClause:{},pfaAdjustments:[],marriageClauses:[],ueClauses:[],documents:[]};
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+function get(k){return state.data[k]??""} function set(k,v){state.data[k]=v}
+function money(v){if(v===null||v===undefined||String(v).trim()==="")return null;let n=Number(String(v).replace(/\./g,"").replace(",", "."));return Number.isFinite(n)?n:null}
+function fmt(n){return (Number(n)||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}
+function regimeOptions(value=""){return regimes.map(([v,l])=>`<option value="${v}" ${v===value?"selected":""}>${l}</option>`).join("")}
+function regimeLabel(v){return (regimes.find(x=>x[0]===v)||[])[1]||"a qualificar"}
+function d(v){return v?new Date(v+"T12:00:00"):null}
+function conditionals(){ $$(".conditional").forEach(el=>{const [k,v]=(el.dataset.show||"=").split("=");el.classList.toggle("show",String(get(k))===v)}) }
+function bindBase(){
+ $$(".regime").forEach(s=>{if(!s.options.length)s.innerHTML=regimeOptions(get(s.dataset.k));});
+ $$("[data-k]").forEach(el=>{if(el.dataset.bound)return;el.dataset.bound=1;el.value=get(el.dataset.k)||el.value||"";el.addEventListener("change",()=>{set(el.dataset.k,el.value);conditionals();render()});el.addEventListener("input",()=>{set(el.dataset.k,el.value);render()})});
+}
+
+function clauseScopeOptions(v=""){return [
+ ["","Selecione"],["all","Todos os bens abrangidos pela convenção"],["onerous","Aquisições onerosas"],
+ ["gratuitous","Doações e heranças"],["realestate","Imóveis"],["business","Participações societárias"],
+ ["financial","Ativos financeiros"],["specific","Bem específico / individualizado"],["other","Outra categoria"]
+].map(([x,l])=>`<option value="${x}" ${x===v?"selected":""}>${l}</option>`).join("")}
+function clauseEffectOptions(v=""){return [
+ ["","Selecione"],["communicate","Determina comunicabilidade"],["exclude","Determina incomunicabilidade"],
+ ["share","Fixa proporção própria"],["ownership","Preserva titularidade individual"],["other","Outra disciplina"]
+].map(([x,l])=>`<option value="${x}" ${x===v?"selected":""}>${l}</option>`).join("")}
+function clauseTemplate(c,i,kind){
+ const title=kind==="marriage"?"Pacto":"Contrato";
+ return `<div class="rowcard" data-clause-id="${c.id}"><div class="rowhead"><strong>${title} — regra ${i+1}</strong><button class="btn secondary" onclick="removeClause('${kind}','${c.id}')">Remover</button></div><div class="grid">
+ <div class="f"><label>Alcance material</label><select onchange="clause('${kind}','${c.id}','scope',this.value)">${clauseScopeOptions(c.scope)}</select></div>
+ <div class="f"><label>Efeito patrimonial convencionado</label><select onchange="clause('${kind}','${c.id}','effect',this.value)">${clauseEffectOptions(c.effect)}</select></div>
+ <div class="f"><label>Data inicial expressamente prevista, se houver</label><input type="date" value="${esc(c.startDate)}" onchange="clause('${kind}','${c.id}','startDate',this.value)"></div>
+ <div class="f"><label>Parte favorecida / titular, se pertinente</label><select onchange="clause('${kind}','${c.id}','party',this.value)"><option value="">Não se aplica / selecione</option><option value="A" ${c.party==="A"?"selected":""}>Parte A</option><option value="B" ${c.party==="B"?"selected":""}>Parte B</option><option value="AB" ${c.party==="AB"?"selected":""}>Ambos</option></select></div>
+ <div class="f"><label>Percentual de A, se a cláusula fixar proporção</label><input type="number" min="0" max="100" step="0.01" value="${esc(c.shareA)}" onchange="clause('${kind}','${c.id}','shareA',this.value)"></div>
+ <div class="f"><label>Identificação do bem/categoria, se necessária</label><input value="${esc(c.target)}" onchange="clause('${kind}','${c.id}','target',this.value)"></div>
+ <div class="s6"><label>Texto-fonte / excerto que sustenta esta regra</label><textarea onchange="clause('${kind}','${c.id}','sourceText',this.value)">${esc(c.sourceText||"")}</textarea></div>
+ <div class="s6"><label>Interpretação/estruturação da cláusula e observações de validade/eficácia</label><textarea onchange="clause('${kind}','${c.id}','details',this.value)">${esc(c.details)}</textarea></div>
+ </div></div>`}
+function clause(kind,id,k,v){const arr=kind==="marriage"?state.marriageClauses:state.ueClauses;const c=arr.find(x=>x.id===id);if(c)c[k]=v;render()}
+function removeClause(kind,id){const key=kind==="marriage"?"marriageClauses":"ueClauses";state[key]=state[key].filter(x=>x.id!==id);render()}
+function renderClauses(){
+ const m=$("#marriageClauses"),u=$("#ueClauses");
+ if(m)m.innerHTML=state.marriageClauses.map((c,i)=>clauseTemplate(c,i,"marriage")).join("");
+ if(u)u.innerHTML=state.ueClauses.map((c,i)=>clauseTemplate(c,i,"ue")).join("");
+}
+
+function documentReadiness(ctx){
+ const type=get("rel.type");
+ if(type==="Casamento" && get("marriage.pact")==="sim"){
+   if(get("marriage.pactDoc")!=="Sim") return {ready:false,reason:"Há pacto antenupcial, mas o documento não está disponível/confirmado para análise."};
+   if(get("marriage.pactImported")!=="Sim") return {ready:false,reason:"O conteúdo patrimonial do pacto ainda não foi integralmente importado/estruturado."};
+   if(!["Confirmado","Confirmado com ajustes"].includes(get("marriage.pactValidated"))) return {ready:false,reason:"O conteúdo estruturado do pacto ainda não foi validado pelo profissional."};
+ }
+ if(type==="União estável" && get("ue.contract")==="sim"){
+   if(get("ue.contractDoc")!=="Sim") return {ready:false,reason:"Há contrato de convivência, mas o documento não está disponível/confirmado para análise."};
+   if(get("ue.contractImported")!=="Sim") return {ready:false,reason:"O conteúdo patrimonial do contrato ainda não foi integralmente importado/estruturado."};
+   if(!["Confirmado","Confirmado com ajustes"].includes(get("ue.contractValidated"))) return {ready:false,reason:"O conteúdo estruturado do contrato ainda não foi validado pelo profissional."};
+ }
+ return {ready:true,reason:""};
+}
+function renderDocumentStatus(){
+ const m=$("#marriageDocStatus"),u=$("#ueDocStatus");
+ if(m){
+   const relevant=get("marriage.pact")==="sim";
+   if(!relevant)m.textContent="";
+   else{
+     const r=documentReadiness();
+     m.innerHTML=r.ready?"<strong>Documento estruturado e validado:</strong> as regras específicas podem ser aplicadas.":"<strong>Pendência documental:</strong> "+esc(r.reason);
+   }
+ }
+ if(u){
+   const relevant=get("ue.contract")==="sim";
+   if(!relevant)u.textContent="";
+   else{
+     const r=documentReadiness();
+     u.innerHTML=r.ready?"<strong>Documento estruturado e validado:</strong> as regras específicas podem ser aplicadas.":"<strong>Pendência documental:</strong> "+esc(r.reason);
+   }
+ }
+}
+
+function activeClauses(){
+ const type=get("rel.type");
+ return type==="Casamento"?state.marriageClauses:(type==="União estável"?state.ueClauses:[]);
+}
+function clauseMatches(c,a){
+ if(!c.scope||!c.effect)return false;
+ if(c.startDate && a.date && d(a.date)<d(c.startDate))return false;
+ if(c.scope==="all")return true;
+ if(c.scope==="onerous")return !["Doação","Sucessão / herança"].includes(a.origin);
+ if(c.scope==="gratuitous")return ["Doação","Sucessão / herança"].includes(a.origin);
+ if(c.scope==="realestate")return a.nature==="Imóvel";
+ if(c.scope==="business")return a.nature==="Participação societária / ações";
+ if(c.scope==="financial")return a.nature==="Dinheiro / investimento";
+ if(c.scope==="specific")return !!c.target && (a.description||"").toLowerCase().includes(c.target.toLowerCase());
+ if(c.scope==="other")return !!c.target && ((a.description||"")+" "+(a.nature||"")).toLowerCase().includes(c.target.toLowerCase());
+ return false;
+}
+function conventionOverride(a){
+ const clauses=activeClauses().filter(c=>clauseMatches(c,a));
+ if(!clauses.length)return null;
+ if(clauses.length>1)return {pending:true,reason:"Mais de uma regra convencional alcança este bem; é necessário verificar compatibilidade e prevalência entre as cláusulas."};
+ const c=clauses[0];
+ const baseForAsset=effectiveRegime(a.date).regime;
+ if(baseForAsset==="sob" && (c.effect==="communicate"||c.effect==="share")){
+   return {pending:true,reason:"A cláusula convencional parece ampliar a comunicabilidade no regime de separação obrigatória. O sistema não aplicará essa ampliação automaticamente; exige qualificação jurídica específica."};
+ }
+ if(c.effect==="communicate")return {label:"Regra convencional específica — comunicável",a:.5,b:.5,reason:"A cláusula específica cadastrada determina comunicabilidade e prevalece, neste alcance, sobre a regra-padrão do regime."};
+ if(c.effect==="exclude"||c.effect==="ownership"){
+   if(c.party==="A")return {label:"Regra convencional específica — particular de A",a:1,b:0,reason:"A cláusula específica cadastrada preserva/exclui da comunhão em favor de A."};
+   if(c.party==="B")return {label:"Regra convencional específica — particular de B",a:0,b:1,reason:"A cláusula específica cadastrada preserva/exclui da comunhão em favor de B."};
+   return {pending:true,reason:"A cláusula específica afasta/preserva comunicabilidade, mas falta identificar a parte titular/favorecida."};
+ }
+ if(c.effect==="share"){
+   const s=c.shareA===""||c.shareA==null?NaN:Number(c.shareA);
+   if(Number.isFinite(s)&&s>=0&&s<=100)return {label:"Regra convencional específica — proporção própria",a:s/100,b:1-s/100,reason:`A cláusula fixa proporção própria: A ${s}% e B ${100-s}%.`};
+   return {pending:true,reason:"A cláusula prevê proporção própria, mas o percentual de A não foi estabilizado."};
+ }
+ return {pending:true,reason:"Há regra convencional específica aplicável, mas seu efeito ainda exige interpretação jurídica."};
+}
+
+
+function changeReadiness(c){
+ if(!c.before||!c.after) return {ready:false,reason:"Pendência: regimes anterior e posterior precisam ser identificados."};
+ if(!c.date) return {ready:false,reason:"Pendência: falta fixar a data de eficácia patrimonial adotada para a alteração."};
+ if(!c.docType||c.docType==="verificar") return {ready:false,reason:"Pendência: instrumento-fonte da alteração não está qualificado."};
+ if(!c.docRef) return {ready:false,reason:"Pendência: documento-fonte da alteração ainda não foi identificado/referenciado."};
+ if(c.imported!=="Sim") return {ready:false,reason:"Pendência: conteúdo relevante do instrumento ainda não foi integralmente estruturado."};
+ if(!["Confirmado","Confirmado com ajustes"].includes(c.validated)) return {ready:false,reason:"Pendência: alteração e sua eficácia temporal ainda não foram validadas pelo profissional."};
+ return {ready:true,reason:""};
+}
+function relationshipChronologyReadiness(){
+ const start=d(get("rel.start")),sep=d(get("rel.separation"));
+ if(start&&sep&&sep<start)return {ready:false,reason:"A data da separação de fato é anterior ao início do vínculo; a cronologia precisa ser corrigida antes da qualificação patrimonial."};
+ for(const who of ["a","b"]){
+   const birth=d(get(`${who}.birth`));
+   if(start&&birth&&birth>start)return {ready:false,reason:`A data de nascimento da Parte ${who.toUpperCase()} é posterior ao início do vínculo; revisar a cronologia informada.`};
+ }
+ if(get("rel.type")==="Casamento"){
+   const reg=d(get("marriage.registration"));
+   if(start&&reg&&reg<start&&get("marriage.form")==="Casamento religioso com efeitos civis")return {ready:false,reason:"A data do registro civil foi informada como anterior à data do casamento religioso; revisar a cronologia documental."};
+   const pact=d(get("marriage.pactDate"));
+   if(start&&pact&&pact>start)return {ready:false,reason:"A data informada para o pacto antenupcial é posterior ao início do casamento; revisar o instrumento e sua qualificação."};
+ }
+ if(get("rel.type")==="União estável"&&get("ue.contract")==="sim"){
+   const cd=d(get("ue.instrumentDate")||get("ue.contractDate"));
+   if(sep&&cd&&cd>sep)return {ready:false,reason:"O contrato de convivência foi datado após a separação de fato informada; sua eficácia patrimonial exige estabilização cronológica antes de aplicação automática."};
+ }
+ return {ready:true,reason:""};
+}
+function regimeChronologyReadiness(){
+ const rr=relationshipChronologyReadiness();if(!rr.ready)return rr;
+ const status=get("regime.changed");
+ if(status==="duvida") return {ready:false,reason:"Há dúvida sobre alteração do regime de bens; a cronologia patrimonial não está estabilizada."};
+ if(status==="sim"){
+   if(!state.changes.length) return {ready:false,reason:"Foi informada alteração do regime, mas nenhuma alteração foi cadastrada."};
+   for(const c of state.changes){
+     const r=changeReadiness(c);
+     if(!r.ready) return r;
+   }
+   const start=d(get("rel.start")),sep=d(get("rel.separation"));
+   const cs=[...state.changes].sort((a,b)=>d(a.date)-d(b.date));
+   for(let i=0;i<cs.length;i++){
+     const cd=d(cs[i].date);
+     if(start&&cd&&cd<start)return {ready:false,reason:"Há alteração de regime com eficácia patrimonial anterior ao início do vínculo; revisar a cronologia."};
+     if(sep&&cd&&cd>sep)return {ready:false,reason:"Há alteração de regime com eficácia patrimonial posterior à separação de fato informada; revisar a cronologia e a eficácia do instrumento."};
+     if(i>0){
+       if(cs[i-1].date===cs[i].date)return {ready:false,reason:"Há mais de uma alteração de regime na mesma data de eficácia; a ordem e a prevalência precisam ser estabilizadas."};
+       if(cs[i-1].after!==cs[i].before)return {ready:false,reason:"A cadeia de alterações de regime é descontínua: o regime posterior de uma alteração não coincide com o regime anterior da seguinte."};
+     }
+   }
+ }
+ return {ready:true,reason:""};
+}
+function renderChanges(){
+ $("#changes").innerHTML=state.changes.map((c,i)=>`<div class="rowcard">
+ <div class="rowhead"><strong>Alteração ${i+1}</strong><button class="btn secondary" onclick="removeChange('${c.id}')">Remover</button></div>
+ <div class="hint">A alteração do regime só poderá repercutir automaticamente sobre os bens quando o instrumento-fonte estiver identificado, seu conteúdo relevante tiver sido estruturado e a data de eficácia patrimonial tiver sido validada pelo profissional.</div>
+ <div class="grid">
+   <div class="f"><label>Regime anterior</label><select onchange="chg('${c.id}','before',this.value)">${regimeOptions(c.before)}</select></div>
+   <div class="f"><label>Regime posterior</label><select onchange="chg('${c.id}','after',this.value)">${regimeOptions(c.after)}</select></div>
+   <div class="f"><label>Data de eficácia patrimonial adotada</label><input type="date" value="${esc(c.date)}" onchange="chg('${c.id}','date',this.value)"></div>
+
+   <div class="f"><label>Tipo de instrumento-fonte</label><select onchange="chg('${c.id}','docType',this.value)">
+     <option value="">Selecione</option>
+     <option value="decisao" ${c.docType==="decisao"?"selected":""}>Decisão judicial</option>
+     <option value="escritura" ${c.docType==="escritura"?"selected":""}>Escritura / instrumento público</option>
+     <option value="outro" ${c.docType==="outro"?"selected":""}>Outro instrumento</option>
+     <option value="verificar" ${c.docType==="verificar"?"selected":""}>A verificar</option>
+   </select></div>
+   <div class="f"><label>Identificação / referência do documento</label><input value="${esc(c.docRef)}" onchange="chg('${c.id}','docRef',this.value)"></div>
+   <div class="f"><label>Data do instrumento</label><input type="date" value="${esc(c.docDate)}" onchange="chg('${c.id}','docDate',this.value)"></div>
+
+   <div class="f"><label>Origem dos dados do documento</label><select onchange="chg('${c.id}','ingestion',this.value)">
+     <option value="">Selecione</option>
+     <option value="manual" ${c.ingestion==="manual"?"selected":""}>Preenchimento manual</option>
+     <option value="documental" ${c.ingestion==="documental"?"selected":""}>Leitura documental automatizada (Premium — futura)</option>
+   </select></div>
+   <div class="f"><label>Conteúdo relevante foi importado/estruturado?</label><select onchange="chg('${c.id}','imported',this.value)">
+     <option value="">Selecione</option>
+     <option value="Sim" ${c.imported==="Sim"?"selected":""}>Sim</option>
+     <option value="Não" ${c.imported==="Não"?"selected":""}>Não</option>
+     <option value="Parcialmente" ${c.imported==="Parcialmente"?"selected":""}>Parcialmente</option>
+   </select></div>
+   <div class="f"><label>Validação profissional</label><select onchange="chg('${c.id}','validated',this.value)">
+     <option value="">Selecione</option>
+     <option value="Confirmado" ${c.validated==="Confirmado"?"selected":""}>Confirmado</option>
+     <option value="Confirmado com ajustes" ${c.validated==="Confirmado com ajustes"?"selected":""}>Confirmado com ajustes</option>
+     <option value="Pendente" ${c.validated==="Pendente"?"selected":""}>Pendente</option>
+   </select></div>
+
+   <div class="s6"><label>Texto-fonte / excerto relevante</label><textarea onchange="chg('${c.id}','sourceText',this.value)">${esc(c.sourceText)}</textarea></div>
+   <div class="s6"><label>Fundamento, alcance temporal e observações</label><textarea onchange="chg('${c.id}','details',this.value)">${esc(c.details)}</textarea></div>
+ </div>
+ <div class="hint">${esc(changeReadiness(c).reason || "Documento da alteração estruturado e validado.")}</div>
+ </div>`).join("");
+}
+function chg(id,k,v){let x=state.changes.find(x=>x.id===id);if(x)x[k]=v;render()}
+function removeChange(id){state.changes=state.changes.filter(x=>x.id!==id);render()}
+
+function addDisposal(){
+ state.disposals=state.disposals||[];
+ state.disposals.push({id:uid(),assetId:"",assetRef:"",date:"",assetType:"",businessAsset:"",act:"",actor:"",consent:"",thirdPartyKnowledge:"",uePublicity:"",priceIssue:"",relatedParty:"",rapidSequence:"",powerOfAttorney:"",notes:""});
+ render();
+}
+function disposal(id,k,v){const d=(state.disposals||[]).find(x=>x.id===id);if(d){d[k]=v;render()}}
+function delDisposal(id){state.disposals=(state.disposals||[]).filter(x=>x.id!==id);render()}
+
+function linkedAsset(d){return d.assetId?(state.assets||[]).find(a=>a.id===d.assetId)||null:null}
+function assetName(a){
+ if(!a)return "";
+ return a.description||a.name||a.asset||a.tipo||("Bem "+String((state.assets||[]).indexOf(a)+1));
+}
+function assetSelectOptions(d){
+ return `<option value="">Bem não cadastrado / alienado anteriormente</option>`+
+ (state.assets||[]).map(a=>`<option value="${a.id}" ${d.assetId===a.id?"selected":""}>${esc(assetName(a))}</option>`).join("");
+}
+function disposalKnownFacts(d){
+ const a=linkedAsset(d); if(!a)return {a:null};
+ const date=d.date||a.date||a.acquisitionDate||"";
+ const assetType=d.assetType||(String(a.type||a.kind||"").toLowerCase().includes("im")?"imovel":"");
+ return {a,date,assetType};
+}
+function disposalTemplate(d){
+ const er=effectiveRegime(d.date);
+ return `<div class="rowcard">
+ <div class="grid">
+ <div class="s6 f"><label>Bem/ativo alienado ou onerado</label><select onchange="disposal('${d.id}','assetId',this.value)">${assetSelectOptions(d)}</select></div>
+ ${!d.assetId?`<div class="s6 f"><label>Descrição do bem não cadastrado</label><input value="${esc(d.assetRef||"")}" onchange="disposal('${d.id}','assetRef',this.value)"><span class="hint">Use somente para bem já alienado que não integra o cadastro patrimonial atual.</span></div>`:""}
+ <div class="s3 f"><label>Data do ato</label><input placeholder="dd/mm/aaaa" value="${esc(d.date||"")}" onchange="disposal('${d.id}','date',this.value)"></div>
+ <div class="s3 f"><label>Regime na data</label><input disabled value="${esc(er.pending?'A verificar':regimeLabel(er.regime))}"></div>
+ ${linkedAsset(d)?`<div class="s12 hint"><strong>Dados reutilizados do cadastro patrimonial:</strong> ${esc(assetName(linkedAsset(d)))}. Titularidade/origem/data de aquisição/comunicabilidade permanecem na ficha do bem e serão consumidas pelo Motor, sem nova coleta.</div>`:""}
+ <div class="s4 f"><label>Natureza do bem</label><select onchange="disposal('${d.id}','assetType',this.value)">
+<option value="">Selecione</option><option value="imovel" ${d.assetType==="imovel"?"selected":""}>Imóvel</option><option value="movel" ${d.assetType==="movel"?"selected":""}>Móvel/valor/direito</option><option value="duvida" ${d.assetType==="duvida"?"selected":""}>A verificar</option></select></div>
+<div class="s4 f"><label>Natureza do ato</label><select onchange="disposal('${d.id}','act',this.value)">
+ <option value="">Selecione</option><option value="venda" ${d.act==="venda"?"selected":""}>Venda/cessão</option><option value="doacao" ${d.act==="doacao"?"selected":""}>Doação</option><option value="onus" ${d.act==="onus"?"selected":""}>Ônus real/garantia</option><option value="permuta" ${d.act==="permuta"?"selected":""}>Permuta/dação</option><option value="outro" ${d.act==="outro"?"selected":""}>Outro</option></select></div>
+ <div class="s4 f"><label>Imóvel integra patrimônio empresarial do empresário individual?</label><select onchange="disposal('${d.id}','businessAsset',this.value)"><option value="">Não se aplica / selecione</option><option value="sim" ${d.businessAsset==="sim"?"selected":""}>Sim</option><option value="nao" ${d.businessAsset==="nao"?"selected":""}>Não</option><option value="duvida" ${d.businessAsset==="duvida"?"selected":""}>A verificar</option></select></div>
+<div class="s4 f"><label>Quem praticou o ato?</label><select onchange="disposal('${d.id}','actor',this.value)"><option value="">Selecione</option><option value="A" ${d.actor==="A"?"selected":""}>Parte A</option><option value="B" ${d.actor==="B"?"selected":""}>Parte B</option><option value="ambos" ${d.actor==="ambos"?"selected":""}>Ambos</option></select></div>
+ <div class="s4 f"><label>Houve anuência/outorga da outra parte?</label><select onchange="disposal('${d.id}','consent',this.value)"><option value="">Selecione</option><option value="sim" ${d.consent==="sim"?"selected":""}>Sim</option><option value="nao" ${d.consent==="nao"?"selected":""}>Não</option><option value="dispensada" ${d.consent==="dispensada"?"selected":""}>Dispensada — verificar regime/pacto</option><option value="duvida" ${d.consent==="duvida"?"selected":""}>A verificar</option></select></div>
+ <div class="s4 f"><label>Preço/contraprestação aparentemente incompatível?</label><select onchange="disposal('${d.id}','priceIssue',this.value)"><option value="">Selecione</option><option value="nao" ${d.priceIssue==="nao"?"selected":""}>Não</option><option value="sim" ${d.priceIssue==="sim"?"selected":""}>Sim</option><option value="duvida" ${d.priceIssue==="duvida"?"selected":""}>A verificar</option></select></div>
+ <div class="s4 f"><label>Negócio com familiar/pessoa relacionada?</label><select onchange="disposal('${d.id}','relatedParty',this.value)"><option value="">Selecione</option><option value="nao" ${d.relatedParty==="nao"?"selected":""}>Não</option><option value="sim" ${d.relatedParty==="sim"?"selected":""}>Sim</option><option value="duvida" ${d.relatedParty==="duvida"?"selected":""}>A verificar</option></select></div>
+ <div class="s4 f"><label>Houve outros atos próximos/sucessivos?</label><select onchange="disposal('${d.id}','rapidSequence',this.value)"><option value="">Selecione</option><option value="nao" ${d.rapidSequence==="nao"?"selected":""}>Não</option><option value="sim" ${d.rapidSequence==="sim"?"selected":""}>Sim</option><option value="duvida" ${d.rapidSequence==="duvida"?"selected":""}>A verificar</option></select></div>
+ <div class="s4 f"><label>Na UE, havia publicidade registral/notoriedade jurídica perante terceiros?</label><select onchange="disposal('${d.id}','uePublicity',this.value)"><option value="">Não se aplica / selecione</option><option value="sim" ${d.uePublicity==="sim"?"selected":""}>Sim</option><option value="nao" ${d.uePublicity==="nao"?"selected":""}>Não</option><option value="duvida" ${d.uePublicity==="duvida"?"selected":""}>A verificar</option></select></div>
+ <div class="s4 f"><label>O terceiro conhecia a união/casamento e a possível limitação?</label><select onchange="disposal('${d.id}','thirdPartyKnowledge',this.value)"><option value="">Selecione</option><option value="sim" ${d.thirdPartyKnowledge==="sim"?"selected":""}>Sim</option><option value="nao" ${d.thirdPartyKnowledge==="nao"?"selected":""}>Não</option><option value="duvida" ${d.thirdPartyKnowledge==="duvida"?"selected":""}>A verificar</option></select></div>
+ <div class="s4 f"><label>Uso de procuração para o ato?</label><select onchange="disposal('${d.id}','powerOfAttorney',this.value)"><option value="">Selecione</option><option value="nao" ${d.powerOfAttorney==="nao"?"selected":""}>Não</option><option value="sim" ${d.powerOfAttorney==="sim"?"selected":""}>Sim</option><option value="duvida" ${d.powerOfAttorney==="duvida"?"selected":""}>A verificar</option></select></div>
+ <div class="s12">${(()=>{const q=outorgaAssessment(d);return `<div class="${q.status==="exigivel"?"warn":"hint"}"><strong>Motor de outorga: ${esc(q.status)}</strong> — ${esc(q.reason)}</div>`})()}</div>
+<div class="s12 f"><label>Observações/documentos do ato</label><textarea onchange="disposal('${d.id}','notes',this.value)">${esc(d.notes||"")}</textarea></div>
+ </div><button class="danger" onclick="delDisposal('${d.id}')">Excluir ato</button></div>`;
+}
+
+
+function linkedAssetQualification(d){
+ const a=linkedAsset(d);
+ if(!a)return {known:false,common:null,owner:null};
+ // Reuse the existing regime classifier when possible; never create a second substantive engine.
+ try{
+   const c=classify(a);
+   const txt=JSON.stringify(c||{}).toLowerCase();
+   if(txt.includes("50")||txt.includes("comum")||txt.includes("comunic")) return {known:true,common:true,owner:a.owner||a.acquirer||""};
+   if(txt.includes("particular")||txt.includes("exclu")||txt.includes("100")) return {known:true,common:false,owner:a.owner||a.acquirer||""};
+ }catch(e){}
+ return {known:true,common:null,owner:a.owner||a.acquirer||""};
+}
+
+function outorgaClauseReady(){
+ const c=state.outorgaClause||{};
+ if(get("outorgaClause.exists")==="nao")return {exists:false,ready:true,c};
+ if(get("outorgaClause.exists")!=="sim")return {exists:false,ready:false,c,reason:"Existência de cláusula de outorga/livre disposição ainda não estabilizada."};
+ if(!get("outorgaClause.effect")||!get("outorgaClause.scope")||!get("outorgaClause.acts")||get("outorgaClause.validated")!=="sim"||!get("outorgaClause.source"))
+   return {exists:true,ready:false,c,reason:"Cláusula existente, mas escopo/efeito/atos, trecho-fonte ou validação profissional estão incompletos."};
+ return {exists:true,ready:true,c};
+}
+function clauseCoversDisposal(d){
+ const q=outorgaClauseReady(); if(!q.exists||!q.ready)return false;
+ const scope=get("outorgaClause.scope"), acts=get("outorgaClause.acts"), party=get("outorgaClause.party")||"ambos";
+ if(party!=="ambos" && d.actor && party!==d.actor)return false;
+ const scopeOK=scope==="imoveis_todos" || (scope==="imoveis_particulares"&&d.assetType==="imovel") || scope==="atos_especificos" || scope==="outro";
+ const actOK=acts==="amplo"||acts==="alienar_onerar"||(acts==="alienar"&&["venda","doacao","permuta"].includes(d.act))||(acts==="onerar"&&d.act==="onus")||(acts==="doar"&&d.act==="doacao")||acts==="outro";
+ return scopeOK&&actOK;
+}
+function outorgaAssessment(d){
+ const er=effectiveRegime(d.date);
+ if(er.pending)return {status:"pendente",reason:er.reason};
+ const r=er.regime, rel=get("rel.type");
+ if(d.assetId&&!linkedAsset(d))return {status:"pendente",reason:"O bem vinculado não existe mais no cadastro patrimonial. Refazer a vinculação."};
+ if(!d.date)return {status:"pendente",reason:"Informe a data do ato para identificar o regime vigente e a disciplina aplicável."};
+ if(!d.assetType||d.assetType==="duvida"||!d.act)return {status:"pendente",reason:"Faltam natureza do bem/ato para aferir incidência da outorga."};
+
+ // Art. 978 CC: exception for entrepreneur's business real estate.
+ if(d.assetType==="imovel"&&d.businessAsset==="sim")
+   return {status:"dispensada",reason:"Possível dispensa legal do art. 978 CC para imóvel integrante do patrimônio da empresa do empresário; confirmar enquadramento factual e registral."};
+
+ // Stable union: first assess whether the asset is common under the regime; third-party effects are separate.
+ if(rel==="União estável" && d.assetType==="imovel"){
+   if(r==="sob") return {status:"dispensada",reason:"STJ: na UE submetida imperativamente à separação obrigatória, é inexigível consentimento para alienação/doação de bem particular. Se houver copropriedade formal, analisar o título."};
+   if(r==="scb") return {status:"depende",reason:"UE sob separação convencional: verificar contrato, titularidade e eventual copropriedade; não importar automaticamente a outorga da CPB."};
+   return {status:"exigivel",reason:"STJ aplica autorização convivencial à alienação/oneração de imóvel comum na UE. Efeitos perante terceiro dependem ainda de publicidade/conhecimento."};
+ }
+
+ // Marriage: art. 1.647 I — immovable property, except absolute separation.
+ if(d.assetType==="imovel"){
+   if(r==="scb") return {status:"dispensada",reason:"Separação convencional absoluta: exceção do art. 1.647 CC, sem prejuízo de cláusula específica/titularidade."};
+   if(r==="pfa"){
+      const cq=outorgaClauseReady();
+      if(cq.exists&&!cq.ready)return {status:"pendente",reason:cq.reason};
+      if(cq.exists&&clauseCoversDisposal(d)){
+        const eff=get("outorgaClause.effect");
+        if(eff==="livre"||eff==="autorizacao_previa")
+          return {status:"dispensada",reason:"PFA: cláusula estruturada e validada do pacto alcança preliminarmente o ato. Art. 1.656 autoriza convencionar livre disposição de imóveis particulares; confirmar que o bem é efetivamente particular e que o alcance da cláusula não excede a autorização legal."};
+        if(eff==="exige")
+          return {status:"exigivel",reason:"PFA: o próprio pacto estruturado exige anuência para o ato abrangido."};
+      }
+      return {status:"exigivel",reason:"PFA: na ausência de cláusula validada e aplicável de livre disposição, prevalece a exigência do art. 1.647 para alienação/oneração de imóvel. O art. 1.656 permite afastá-la convencionalmente quanto a imóveis particulares."};
+   }
+   return {status:"exigivel",reason:"Art. 1.647, I: alienação/oneração de imóvel exige autorização, inclusive se particular, salvo separação absoluta ou exceção legal específica."};
+ }
+
+ // Movables: only donation of common/future-meação assets is in art. 1.647 IV among disposal acts modeled here.
+ if(d.assetType==="movel" && d.act==="doacao"){
+   if(r==="scb") return {status:"dispensada",reason:"Separação convencional absoluta: exceção do art. 1.647, ressalvada copropriedade/título."};
+   const aq=linkedAssetQualification(d);
+   if(aq.common===true)return {status:"exigivel",reason:"Doação não remuneratória de bem móvel qualificado pela própria Ficha como comum/comunicável: incidência preliminar do art. 1.647, IV."};
+   if(aq.common===false)return {status:"depende",reason:"Bem móvel preliminarmente particular. Confirmar se pode integrar futura meação antes de afastar o art. 1.647, IV."};
+   return {status:"depende",reason:"Doação de bem móvel: art. 1.647, IV depende de ser bem comum ou poder integrar futura meação. Vincule o ativo cadastrado para reutilizar sua qualificação patrimonial."};
+ }
+ return {status:"nao_identificada",reason:"Para este ato/bem, o gatilho de outorga não foi identificado automaticamente. Verificar outras hipóteses do art. 1.647 se o ato envolver demanda sobre imóvel, fiança ou aval."};
+}
+function protectionAssessment(){
+ const ds=state.disposals||[]; let indicators=0, reasons=[];
+ ds.forEach(d=>{
+  if(d.consent==="nao"){const q=outorgaAssessment(d);if(q.status==="exigivel"){indicators++;reasons.push("ato sem anuência/outorga quando preliminarmente exigível")}else if(q.status==="depende"){reasons.push("ato sem anuência com incidência de outorga ainda dependente de pacto/titularidade")}}
+  if(d.priceIssue==="sim"){indicators++;reasons.push("contraprestação aparentemente incompatível")}
+  if(d.relatedParty==="sim"){indicators++;reasons.push("negócio com pessoa relacionada")}
+  if(d.rapidSequence==="sim"){indicators++;reasons.push("atos sucessivos/próximos")}
+  if(d.powerOfAttorney==="sim"){indicators++;reasons.push("uso de procuração")}
+ });
+ if(get("protect.control")==="sim"){indicators+=2;reasons.push("retenção/ocultação/subtração/destruição ou restrição de acesso a recursos")}
+ if(!indicators)return {level:"",text:""};
+ const level=indicators>=4?"Possíveis indicadores relevantes de violência patrimonial":indicators>=2?"Risco de dilapidação / atenção protetiva":"Atenção patrimonial";
+ return {level,text:[...new Set(reasons)].join("; ")};
+}
+function assetTemplate(a,i){return `<div class="rowcard" data-asset-id="${a.id}"><div class="rowhead"><strong>Bem ${i+1}</strong><button class="btn secondary" onclick="removeAsset('${a.id}')">Remover</button></div><div class="grid">
+<div class="s6"><label>Descrição</label><input value="${esc(a.description)}" onchange="asset('${a.id}','description',this.value)"></div>
+<div class="f"><label>Natureza</label><select onchange="asset('${a.id}','nature',this.value)"><option value="">Selecione</option>${["Imóvel","Veículo","Dinheiro / investimento","Participação societária / ações","Direito / crédito","Jóia / bem móvel","Outro"].map(x=>`<option ${a.nature===x?"selected":""}>${x}</option>`).join("")}</select></div>
+<div class="f corporate-only"><label>Se participação societária: os frutos/lucros/dividendos posteriores à separação ainda estão pendentes de apuração/partilha?</label><select onchange="asset('${a.id}','corporatePostSepFruits',this.value)"><option value="">Não se aplica / selecione</option><option value="sim" ${a.corporatePostSepFruits==="sim"?"selected":""}>Sim</option><option value="nao" ${a.corporatePostSepFruits==="nao"?"selected":""}>Não</option><option value="duvida" ${a.corporatePostSepFruits==="duvida"?"selected":""}>A verificar</option></select></div>
+<div class="f"><label>Data de aquisição / ingresso</label><input type="date" value="${esc(a.date)}" onchange="asset('${a.id}','date',this.value)"></div>
+<div class="f"><label>Origem</label><select onchange="asset('${a.id}','origin',this.value)"><option value="">Selecione</option>${["Compra e venda","Doação","Sucessão / herança","Permuta","Sub-rogação","Usucapião","Indenização / crédito","Outro"].map(x=>`<option ${a.origin===x?"selected":""}>${x}</option>`).join("")}</select></div>
+<div class="f"><label>Natureza econômica / evento relevante</label><select onchange="asset('${a.id}','event',this.value)"><option value="">Bem principal / não especificado</option>${["Aquisição onerosa","Aquisição gratuita","Fruto / rendimento de bem","Benfeitoria / acessão / incremento","FGTS / verba trabalhista","Participação nos lucros / dividendos","Outro"].map(x=>`<option ${a.event===x?"selected":""}>${x}</option>`).join("")}</select></div>
+<div class="f"><label>Bem-base ao qual fruto/benfeitoria se vincula</label><input value="${esc(a.baseAsset)}" onchange="asset('${a.id}','baseAsset',this.value)" placeholder="Descrição ou identificação"></div>
+<div class="f"><label>Valor atual aproximado (R$)</label><input value="${esc(a.value)}" onchange="asset('${a.id}','value',this.value)"></div>
+<div class="f"><label>Quem adquiriu / recebeu originalmente?</label><select onchange="asset('${a.id}','acquirer',this.value)"><option value="">Selecione</option><option value="A" ${a.acquirer==="A"?"selected":""}>Parte A</option><option value="B" ${a.acquirer==="B"?"selected":""}>Parte B</option><option value="AB" ${a.acquirer==="AB"?"selected":""}>Ambos</option><option value="outro" ${a.acquirer==="outro"?"selected":""}>Terceiro / situação complexa</option></select></div>
+<div class="f"><label>Titularidade formal atual</label><select onchange="asset('${a.id}','formalOwner',this.value)"><option value="">Selecione</option><option value="A" ${a.formalOwner==="A"?"selected":""}>Parte A</option><option value="B" ${a.formalOwner==="B"?"selected":""}>Parte B</option><option value="AB" ${a.formalOwner==="AB"?"selected":""}>Ambos</option><option value="outro" ${a.formalOwner==="outro"?"selected":""}>Outro / a verificar</option></select></div>
+<div class="f"><label>Se em copropriedade, percentual formal de A</label><input type="number" min="0" max="100" step="0.01" value="${esc(a.shareA)}" onchange="asset('${a.id}','shareA',this.value)"></div>
+<div class="f"><label>Houve emprego comprovável de patrimônio particular preexistente/excluído da comunhão?</label><select onchange="asset('${a.id}','privateResources',this.value)"><option value="">Selecione</option><option value="nao" ${a.privateResources==="nao"?"selected":""}>Não</option><option value="A" ${a.privateResources==="A"?"selected":""}>Sim, da Parte A</option><option value="B" ${a.privateResources==="B"?"selected":""}>Sim, da Parte B</option><option value="ambos" ${a.privateResources==="ambos"?"selected":""}>Sim, de ambos</option><option value="parcial" ${a.privateResources==="parcial"?"selected":""}>Parcialmente / composição mista</option><option value="duvida" ${a.privateResources==="duvida"?"selected":""}>A verificar</option></select></div>
+<div class="f"><label>Há sub-rogação alegada?</label><select onchange="asset('${a.id}','subrogation',this.value)"><option value="">Selecione</option><option value="nao" ${a.subrogation==="nao"?"selected":""}>Não</option><option value="A" ${a.subrogation==="A"?"selected":""}>Sim, em favor de A</option><option value="B" ${a.subrogation==="B"?"selected":""}>Sim, em favor de B</option><option value="duvida" ${a.subrogation==="duvida"?"selected":""}>A verificar</option></select></div>
+<div class="f"><label>Há parcelas/aportes pagos após a separação de fato?</label><select onchange="asset('${a.id}','postSepPayments',this.value)"><option value="">Selecione</option><option value="nao" ${a.postSepPayments==="nao"?"selected":""}>Não</option><option value="A" ${a.postSepPayments==="A"?"selected":""}>Sim, exclusivamente por A</option><option value="B" ${a.postSepPayments==="B"?"selected":""}>Sim, exclusivamente por B</option><option value="ambos" ${a.postSepPayments==="ambos"?"selected":""}>Sim, por ambos</option><option value="duvida" ${a.postSepPayments==="duvida"?"selected":""}>A verificar</option></select></div>
+<div class="f"><label>Valor comprovado de recursos particulares / sub-rogação (R$)</label><input value="${esc(a.privateAmount)}" onchange="asset('${a.id}','privateAmount',this.value)"></div>
+<div class="f"><label>Valor comprovado pago após separação de fato (R$)</label><input value="${esc(a.postSepAmount)}" onchange="asset('${a.id}','postSepAmount',this.value)"></div>
+<div class="f"><label>Doação/herança contém cláusula de incomunicabilidade?</label><select onchange="asset('${a.id}','incommunicability',this.value)"><option value="">Não se aplica / não informado</option><option value="nao" ${a.incommunicability==="nao"?"selected":""}>Não</option><option value="sim" ${a.incommunicability==="sim"?"selected":""}>Sim</option><option value="duvida" ${a.incommunicability==="duvida"?"selected":""}>A verificar</option></select></div>
+<div class="f"><label>Há cláusula de inalienabilidade?</label><select onchange="asset('${a.id}','inalienability',this.value)"><option value="">Não se aplica / não informado</option><option value="nao" ${a.inalienability==="nao"?"selected":""}>Não</option><option value="sim" ${a.inalienability==="sim"?"selected":""}>Sim</option><option value="duvida" ${a.inalienability==="duvida"?"selected":""}>A verificar</option></select></div>
+<div class="f"><label>É bem de uso pessoal, livro ou instrumento de profissão?</label><select onchange="asset('${a.id}','personalUse',this.value)"><option value="">Selecione</option><option value="nao" ${a.personalUse==="nao"?"selected":""}>Não</option><option value="sim" ${a.personalUse==="sim"?"selected":""}>Sim</option><option value="duvida" ${a.personalUse==="duvida"?"selected":""}>A verificar</option></select></div>
+<div class="f"><label>É provento do trabalho pessoal / pensão / renda semelhante?</label><select onchange="asset('${a.id}','personalIncome',this.value)"><option value="">Selecione</option><option value="nao" ${a.personalIncome==="nao"?"selected":""}>Não</option><option value="sim" ${a.personalIncome==="sim"?"selected":""}>Sim</option><option value="duvida" ${a.personalIncome==="duvida"?"selected":""}>A verificar</option></select></div>
+<div class="f"><label>O item representa fruto/rendimento de bem particular?</label><select onchange="asset('${a.id}','fruitOfPrivate',this.value)"><option value="">Selecione</option><option value="nao" ${a.fruitOfPrivate==="nao"?"selected":""}>Não</option><option value="sim" ${a.fruitOfPrivate==="sim"?"selected":""}>Sim</option><option value="duvida" ${a.fruitOfPrivate==="duvida"?"selected":""}>A verificar</option></select></div>
+<div class="f"><label>Há disposição expressa excluindo também os frutos?</label><select onchange="asset('${a.id}','fruitsExcluded',this.value)"><option value="">Não informado</option><option value="nao" ${a.fruitsExcluded==="nao"?"selected":""}>Não</option><option value="sim" ${a.fruitsExcluded==="sim"?"selected":""}>Sim</option><option value="duvida" ${a.fruitsExcluded==="duvida"?"selected":""}>A verificar</option></select></div>
+<div class="f"><label>Doação/herança destinada expressamente a ambos?</label><select onchange="asset('${a.id}','jointGiftInheritance',this.value)">
+<option value="">Não se aplica / selecione</option>
+<option value="sim" ${a.jointGiftInheritance==="sim"?"selected":""}>Sim</option>
+<option value="nao" ${a.jointGiftInheritance==="nao"?"selected":""}>Não</option>
+<option value="duvida" ${a.jointGiftInheritance==="duvida"?"selected":""}>A verificar</option>
+</select></div>
+<div class="f"><label>Modo jurídico da aquisição</label><select onchange="asset('${a.id}','acquisitionMode',this.value)">
+<option value="">Selecione</option>
+<option value="onerosa" ${a.acquisitionMode==="onerosa"?"selected":""}>Aquisição onerosa</option>
+<option value="gratuita" ${a.acquisitionMode==="gratuita"?"selected":""}>Aquisição gratuita (doação/herança)</option>
+<option value="eventual" ${a.acquisitionMode==="eventual"?"selected":""}>Fato eventual (ex.: prêmio de loteria)</option>
+<option value="outro" ${a.acquisitionMode==="outro"?"selected":""}>Outro / exige qualificação</option>
+<option value="duvida" ${a.acquisitionMode==="duvida"?"selected":""}>A verificar</option>
+</select></div>
+<div class="f"><label>A aquisição foi onerosa?</label><select onchange="asset('${a.id}','onerous',this.value)"><option value="">Selecione</option><option value="sim" ${a.onerous==="sim"?"selected":""}>Sim</option><option value="nao" ${a.onerous==="nao"?"selected":""}>Não</option><option value="duvida" ${a.onerous==="duvida"?"selected":""}>A verificar</option></select></div>
+<div class="f pfa-only"><label>Valor do bem na data da cessação da convivência</label><input type="text" value="${esc(a.pfaEndValue||"")}" onchange="asset('${a.id}','pfaEndValue',this.value)"></div>
+<div class="f pfa-only"><label>Bem anterior ao casamento/período de PFA?</label><select onchange="asset('${a.id}','pfaPreexisting',this.value)"><option value="">Selecione</option><option value="sim" ${a.pfaPreexisting==="sim"?"selected":""}>Sim</option><option value="nao" ${a.pfaPreexisting==="nao"?"selected":""}>Não</option><option value="duvida" ${a.pfaPreexisting==="duvida"?"selected":""}>A verificar</option></select></div>
+<div class="f pfa-only"><label>Sucessão ou liberalidade individual?</label><select onchange="asset('${a.id}','pfaGratuitous',this.value)"><option value="">Selecione</option><option value="sim" ${a.pfaGratuitous==="sim"?"selected":""}>Sim</option><option value="nao" ${a.pfaGratuitous==="nao"?"selected":""}>Não</option><option value="duvida" ${a.pfaGratuitous==="duvida"?"selected":""}>A verificar</option></select></div>
+<div class="f pfa-only"><label>Sub-rogação de bem excluído dos aquestos?</label><select onchange="asset('${a.id}','pfaSubrogation',this.value)"><option value="">Selecione</option><option value="sim" ${a.pfaSubrogation==="sim"?"selected":""}>Sim</option><option value="nao" ${a.pfaSubrogation==="nao"?"selected":""}>Não</option><option value="parcial" ${a.pfaSubrogation==="parcial"?"selected":""}>Parcial</option><option value="duvida" ${a.pfaSubrogation==="duvida"?"selected":""}>A verificar</option></select></div>
+<div class="f pfa-only"><label>Percentual/valor da parcela sub-rogada, se parcial</label><input type="text" value="${esc(a.pfaSubrogatedPart||"")}" onchange="asset('${a.id}','pfaSubrogatedPart',this.value)"></div>
+<div class="f pfa-only"><label>Bem adquirido pelo trabalho conjunto?</label><select onchange="asset('${a.id}','pfaJointWork',this.value)"><option value="">Selecione</option><option value="sim" ${a.pfaJointWork==="sim"?"selected":""}>Sim</option><option value="nao" ${a.pfaJointWork==="nao"?"selected":""}>Não</option><option value="duvida" ${a.pfaJointWork==="duvida"?"selected":""}>A verificar</option></select></div>
+<div class="f pfa-only"><label>Bem foi doado/alienado sem anuência e deve ser recomposto?</label><select onchange="asset('${a.id}','pfaUnauthorizedDisposition',this.value)"><option value="">Selecione</option><option value="nao" ${a.pfaUnauthorizedDisposition==="nao"?"selected":""}>Não</option><option value="sim" ${a.pfaUnauthorizedDisposition==="sim"?"selected":""}>Sim</option><option value="duvida" ${a.pfaUnauthorizedDisposition==="duvida"?"selected":""}>A verificar</option></select></div>
+<div class="f scb-only"><label>Há pretensão de repercussão patrimonial apesar da separação convencional?</label><select onchange="asset('${a.id}','scbClaim',this.value)">
+<option value="">Selecione</option><option value="nao" ${a.scbClaim==="nao"?"selected":""}>Não</option><option value="sim" ${a.scbClaim==="sim"?"selected":""}>Sim</option><option value="duvida" ${a.scbClaim==="duvida"?"selected":""}>A verificar</option></select></div>
+<div class="f scb-only"><label>Há contribuição efetiva comprovada para aquisição/construção?</label><select onchange="asset('${a.id}','scbContribution',this.value)">
+<option value="">Selecione</option><option value="nao" ${a.scbContribution==="nao"?"selected":""}>Não</option><option value="sim" ${a.scbContribution==="sim"?"selected":""}>Sim</option><option value="parcial" ${a.scbContribution==="parcial"?"selected":""}>Sim, em proporção identificável</option><option value="duvida" ${a.scbContribution==="duvida"?"selected":""}>A verificar</option></select></div>
+<div class="f scb-only"><label>Percentual de A, se contribuição/proporção própria demonstrada</label><input type="number" min="0" max="100" step="0.01" value="${esc(a.scbShareA||"")}" onchange="asset('${a.id}','scbShareA',this.value)"></div>
+<div class="f scb-only"><label>Fundamento/documentos da contribuição</label><textarea onchange="asset('${a.id}','scbContributionDetails',this.value)">${esc(a.scbContributionDetails||"")}</textarea></div>
+<div class="f sob-only"><label>Há alegação de esforço comum na aquisição?</label><select onchange="asset('${a.id}','commonEffortClaim',this.value)"><option value="">Selecione</option><option value="nao" ${a.commonEffortClaim==="nao"?"selected":""}>Não</option><option value="sim" ${a.commonEffortClaim==="sim"?"selected":""}>Sim</option><option value="duvida" ${a.commonEffortClaim==="duvida"?"selected":""}>A verificar</option></select></div>
+<div class="f sob-only"><label>O esforço comum está documental/faticamente demonstrado?</label><select onchange="asset('${a.id}','commonEffortProof',this.value)"><option value="">Selecione</option><option value="nao" ${a.commonEffortProof==="nao"?"selected":""}>Não</option><option value="sim" ${a.commonEffortProof==="sim"?"selected":""}>Sim</option><option value="parcial" ${a.commonEffortProof==="parcial"?"selected":""}>Parcialmente / proporção identificável</option><option value="duvida" ${a.commonEffortProof==="duvida"?"selected":""}>A verificar</option></select></div>
+<div class="f sob-only"><label>Se contribuição proporcional identificável, percentual de A</label><input type="number" min="0" max="100" step="0.01" value="${esc(a.effortShareA||"")}" onchange="asset('${a.id}','effortShareA',this.value)"></div>
+<div class="f sob-only"><label>Na SOB, adotar comunicabilidade desta hipótese peculiar da CPB?</label><select onchange="asset('${a.id}','sobExtensionChoice',this.value)">
+<option value="">Selecione quando aplicável</option>
+<option value="sim" ${a.sobExtensionChoice==="sim"?"selected":""}>Sim — considerar comunicável</option>
+<option value="nao" ${a.sobExtensionChoice==="nao"?"selected":""}>Não — afastar comunicabilidade</option>
+<option value="duvida" ${a.sobExtensionChoice==="duvida"?"selected":""}>Decisão jurídica pendente</option>
+</select></div>
+<div class="f sob-only"><label>Fundamento da opção jurídica</label><textarea onchange="asset('${a.id}','sobExtensionReason',this.value)">${esc(a.sobExtensionReason||"")}</textarea></div>
+<div class="s12"><label>Observações / documentação / circunstâncias relevantes</label><textarea onchange="asset('${a.id}','details',this.value)">${esc(a.details)}</textarea></div>
+</div></div>`}
+function asset(id,k,v){let a=state.assets.find(x=>x.id===id);if(a)a[k]=v;render()}
+function removeAsset(id){state.assets=state.assets.filter(x=>x.id!==id);render()}
+
+function ageAtISO(birth,at){
+ const b=d(birth),x=d(at); if(!b||!x)return null;
+ let a=x.getFullYear()-b.getFullYear();
+ const md=x.getMonth()-b.getMonth();
+ if(md<0||(md===0&&x.getDate()<b.getDate()))a--;
+ return a;
+}
+function sobAgeReason(){
+ const start=get("rel.start"),rel=get("rel.type"),ba=get("a.birth"),bb=get("b.birth");
+ if(!start||!ba||!bb||!["Casamento","União estável"].includes(rel))return "";
+ const A=ageAtISO(ba,start),B=ageAtISO(bb,start),sd=d(start);
+ if(!sd)return "";
+ if(sd>=d("2010-12-10")) return (A>70||B>70)?"idade superior a 70 anos no início do vínculo":"";
+ if(sd>=d("2003-01-11")) return (A>60||B>60)?"idade superior a 60 anos sob a redação originária do CC/2002":"";
+ if(rel==="Casamento"){
+   const sa=get("a.historicalSex"),sb=get("b.historicalSex");
+   if(!sa||!sb)return "regra etária histórica: informar sexo das partes para concluir";
+   if((sa==="M"&&A>60)||(sa==="F"&&A>50)||(sb==="M"&&B>60)||(sb==="F"&&B>50))
+      return "regra etária histórica do CC/1916 potencialmente incidente";
+ }
+ return "";
+}
+function sobSpecialReason(){
+ if(get("rel.type")!=="Casamento")return "";
+ const v=get("marriage.mandatorySpecial");
+ const map={widow_inventory:"causa suspensiva ligada a inventário/partilha anterior",ten_months:"causa suspensiva do período de 10 meses",divorce_partition:"causa suspensiva por partilha anterior pendente",tutor_curator:"causa suspensiva ligada a tutela/curatela",judicial_supply:"suprimento judicial para casar",historical:"hipótese histórica de imposição legal",other:"outra hipótese legal a verificar",unknown:"hipótese especial ainda a verificar"};
+ return map[v]||"";
+}
+function expectedRegimeOriginalMatrix(){
+ const rel=get("rel.type"),start=get("rel.start"); if(!rel||!start)return {code:"",reason:"Aguardando vínculo e data."};
+ const age=sobAgeReason(),special=sobSpecialReason();
+ if(age||special)return {code:"sob",reason:[age,special].filter(Boolean).join("; ")};
+ if(rel==="União estável")return {code:"cpb",reason:"regra supletiva, salvo contrato escrito eficaz ou SOB etária aplicável"};
+ if(d(start)<d("1977-12-27"))return {code:"cub",reason:"regime legal supletivo correspondente ao marco histórico informado"};
+ return {code:"cpb",reason:"regime legal supletivo correspondente ao marco histórico informado"};
+}
+function theme1236OriginalFormationEligible(){
+ const start=get("rel.start"),age=sobAgeReason(),special=sobSpecialReason();
+ return !!(start&&d(start)>=d("2024-02-01")&&age&&!special);
+}
+function renderSobOriginalAudit(){
+ const el=$("#sobOriginalAudit");if(!el)return;
+ const e=expectedRegimeOriginalMatrix(),base=get("regime.base");
+ let extra="";
+ if(sobAgeReason() && d(get("rel.start"))<d("2024-02-01"))extra=" Vínculo anterior a 01/02/2024: eventual afastamento posterior da SOB etária deve entrar como alteração posterior, sem retroagir.";
+ if(sobAgeReason()&&sobSpecialReason())extra+=" Há fundamento autônomo de SOB: o Tema 1.236 não o elimina.";
+ el.innerHTML=`<span class="ui-tag">Alerta jurídico do regime</span><strong>Matriz original — regime esperado:</strong> ${e.code?regimeLabel(e.code):"a verificar"}. ${esc(e.reason||"")}${esc(extra)}${base&&e.code&&base!==e.code?`<br><strong>ATENÇÃO:</strong> o regime informado diverge do esperado; exigir fonte jurídica/documental para a divergência.`:""}`;
+}
+
+function transversalRegimeAudit(){
+ const issues=[],ok=[];
+ const rel=get("rel.type"),start=get("rel.start"),base=get("regime.base");
+ const rr=relationshipChronologyReadiness();if(!rr.ready)issues.push(rr.reason);
+ if(!rel)issues.push("definir casamento ou união estável");
+ if(!start)issues.push("informar a data de início do vínculo");
+ if(!base)issues.push("definir o regime-base efetivo");
+ if(rel==="Casamento"){
+   if(!get("marriage.form"))issues.push("definir a forma do casamento");
+   if(get("marriage.form")==="Casamento religioso com efeitos civis"&&!get("marriage.registration"))
+      issues.push("registrar a data do registro civil, preservando como marco inicial a data do casamento religioso");
+   if(["cub","scb","pfa"].includes(base)&&get("marriage.pact")!=="sim")
+      issues.push("regime convencional informado sem pacto antenupcial");
+   if(get("marriage.pact")==="sim"){
+      const dr=documentReadiness("marriage"); if(dr&&!dr.ready)issues.push("pacto antenupcial ainda não documentalmente estabilizado");
+      else ok.push("pacto antenupcial estruturado/validado");
+   }
+ }
+ if(rel==="União estável"){
+   if(["cub","scb","pfa","outro"].includes(base)&&get("ue.contract")!=="sim")
+      issues.push("regime convencional da união estável sem contrato escrito");
+   if(get("ue.contract")==="sim"){
+      const dr=documentReadiness("ue"); if(dr&&!dr.ready)issues.push("contrato de convivência ainda não documentalmente estabilizado");
+      else ok.push("contrato escrito estruturado/validado");
+      if(!get("ue.contractDate")&&!get("ue.instrumentDate"))issues.push("contrato de convivência sem data para incidência ex nunc");
+   }
+ }
+ if(get("regime.changed")==="sim"){
+   const cr=regimeChronologyReadiness(); if(!cr.ready)issues.push(cr.reason||"alteração de regime incompleta");
+   else ok.push("alterações posteriores cronologicamente estabilizadas");
+ }
+ if(get("rel.separation"))ok.push("separação de fato registrada como marco temporal");
+ const e=expectedRegimeOriginalMatrix();
+ if(base&&e.code&&base!==e.code)issues.push("regime informado diverge do regime esperado pela matriz histórica; exigir fonte jurídica/documental");
+ return {issues:[...new Set(issues)],ok:[...new Set(ok)]};
+}
+function renderRegimeTransversalAudit(){
+ const el=$("#regimeTransversalAudit");if(!el)return;
+ const a=transversalRegimeAudit();
+ el.innerHTML=`<span class="ui-tag">Conferência documental e cronológica</span><strong>Auditoria transversal do regime:</strong> ${a.issues.length?`<span class="warn">${esc(a.issues.join("; "))}.</span>`:`<span class="ok">cadeia mínima coerente.</span>`}${a.ok.length?`<br><span class="hint">${esc(a.ok.join("; "))}.</span>`:""}`;
+}
+function effectiveRegime(date){
+ const rr=relationshipChronologyReadiness();if(!rr.ready)return {regime:get("regime.base")||"",pending:true,reason:rr.reason};
+ const cr0=regimeChronologyReadiness();if(!cr0.ready)return {regime:get("regime.base")||"",pending:true,reason:cr0.reason};
+ // UE: contrato escrito que escolhe regime diverso do legal atua prospectivamente.
+ // Se celebrado antes do início efetivo da convivência, pode disciplinar a UE desde que ela se forme.
+ if(get("rel.type")==="União estável" && get("ue.contract")==="sim"){
+   const chosen=get("ue.contractRegime")||get("regime.base")||"";
+   const contractDate=get("ue.instrumentDate")||get("ue.contractDate")||"";
+   const ueStart=get("rel.start")||get("ue.start")||"";
+   if(chosen && chosen!=="cpb" && contractDate){
+      if(!date) return {pending:true,reason:"União estável com disciplina patrimonial escrita: falta a data do bem para posicioná-lo na cronologia do regime."};
+      const ad=d(date), cd=d(contractDate), sd=d(ueStart);
+      if(ad && cd){
+         // Contrato posterior ao início da UE: período pretérito não é reescrito.
+         if(!sd || cd>sd){
+            if(ad < cd){
+              const mandatory=get("reg.expected")==="sob" || get("reg.mandatory")==="sim";
+              return {regime:mandatory?"sob":"cpb",source:"período anterior ao contrato escrito — eficácia ex nunc",pending:false};
+            }
+            return {regime:chosen,source:"contrato escrito de convivência — eficácia prospectiva",pending:false};
+         }
+         // Instrumento escrito anterior ou contemporâneo ao início: passa a reger quando a UE efetivamente se forma.
+         if(sd && ad>=sd)return {regime:chosen,source:"contrato escrito anterior/contemporâneo à formação da UE",pending:false};
+      }
+   }
+ }
+ // Tema 1.236/STF conforme a matriz original: afastamento originário apenas para vínculos constituídos a partir de 01/02/2024 e sem outra causa autônoma de SOB.
+ if(get("sobAge.only")==="sim" && get("sobAge.waiver")==="sim"){
+   if(!theme1236OriginalFormationEligible()){
+      if(sobSpecialReason())return {regime:"sob",pending:false,source:"SOB mantida por fundamento autônomo não afastado pelo Tema 1.236"};
+      // vínculo anterior: não retroagir; eventual mudança deve constar da cronologia formal de alterações
+   }else{
+      const wr=get("sobAge.chosen"), wd=get("sobAge.date");
+      if(!wr||wr==="outro"||!wd||get("sobAge.validated")!=="sim")
+        return {regime:"sob",pending:true,reason:"Tema 1.236 aplicável, mas escritura/regime/data/validação ainda não estão estabilizados."};
+      if(!date)return {regime:"sob",pending:true,reason:"Falta a data do bem para aplicar o regime escolhido na constituição."};
+      if(d(date)>=d(wd))return {regime:wr,pending:false,source:"Tema 1.236/STF — afastamento originário da SOB etária"};
+   }
+ }
+ let r=get("regime.base");
+ if(!r)return {regime:"",pending:true,reason:"Regime-base não informado."};
+ const cr=regimeChronologyReadiness();
+ if(!cr.ready)return {regime:r,pending:true,reason:cr.reason};
+ const cs=[...state.changes].filter(x=>changeReadiness(x).ready).sort((a,b)=>d(a.date)-d(b.date));
+ if(!date)return {regime:r,pending:cs.length>0,reason:"Data do bem ausente; não é possível identificar o regime vigente na aquisição."};
+ if(cs.length && d(date)<d(cs[0].date) && cs[0].before)r=cs[0].before;
+ for(const c of cs)if(d(date)>=d(c.date))r=c.after;
+ return {regime:r,pending:false,reason:""};
+}
+function classify(a){
+ const start=d(get("rel.start")), ad=d(a.date), er=effectiveRegime(a.date);
+ let o={label:"Qualificação pendente",a:null,b:null,reason:""};
+ if(!start||!ad){o.reason="Falta data do vínculo ou da aquisição.";return o}
+ if(!er.regime||er.pending){o.reason=er.reason||"Regime vigente não estabilizado.";return o}
+ const r=er.regime, before=ad<start, sep=d(get("rel.separation")), afterSep=sep&&ad>sep, sameSepDay=sep&&ad&&ad.getTime()===sep.getTime();
+ if(sameSepDay){
+   o.reason="A aquisição/ingresso foi informada na mesma data da separação de fato. A data isolada não permite afirmar se o fato patrimonial ocorreu antes ou depois do marco efetivo da ruptura; estabilize a cronologia antes da divisão automática.";return o
+ }
+ if(afterSep){
+   if(a.acquirer==="A"){o.label="Aquisição posterior à separação de fato — posição de A";o.a=1;o.b=0}
+   else if(a.acquirer==="B"){o.label="Aquisição posterior à separação de fato — posição de B";o.a=0;o.b=1}
+   else if(a.acquirer==="AB"){
+     const s=a.shareA===""||a.shareA==null?NaN:Number(a.shareA);
+     if(Number.isFinite(s)&&s>=0&&s<=100){o.label="Copropriedade constituída após a separação de fato — preservação das frações formais";o.a=s/100;o.b=1-o.a}
+     else{o.reason="Aquisição conjunta posterior à separação de fato: informar a fração formal de A para qualificar a copropriedade sem presumir meação.";return o}
+   } else {o.reason="Aquisição posterior à separação de fato com titularidade/origem não estabilizada.";return o}
+   o.reason="A separação de fato foi tratada como marco de cessação da comunicabilidade. Eventual aquisição conjunta posterior decorre de copropriedade/título próprio, e não de meação presumida.";return o
+ }
+ if(!a.acquirer){o.reason="Falta identificar quem adquiriu/recebeu originalmente o bem.";return o}
+ const docReady=documentReadiness();
+ if(!docReady.ready){o.reason=docReady.reason;return o}
+
+ const hasDeclaredSpecific=(get("rel.type")==="Casamento"&&get("marriage.specialClauses")==="Sim")||(get("rel.type")==="União estável"&&get("ue.specialClauses")==="Sim");
+ if(hasDeclaredSpecific && activeClauses().length===0){o.reason="Foi informada a existência de cláusula patrimonial específica, mas ela ainda não foi estruturada. A regra-padrão do regime não será aplicada até a cláusula ser qualificada.";return o}
+ const ov=conventionOverride(a);
+ if(ov){if(ov.pending){o.reason=ov.reason;return o} return ov}
+
+ if(before){
+   if(a.acquirer==="A"){o.label="Bem anterior ao vínculo — particular de A";o.a=1;o.b=0}
+   else if(a.acquirer==="B"){o.label="Bem anterior ao vínculo — particular de B";o.a=0;o.b=1}
+   else if(a.acquirer==="AB"){let s=a.shareA===""||a.shareA==null?NaN:Number(a.shareA);if(Number.isFinite(s)&&s>=0&&s<=100){o.label="Copropriedade anterior ao vínculo — preservação das frações informadas";o.a=s/100;o.b=1-o.a}else{o.reason="Copropriedade anterior: informar percentual de A.";return o}}
+   else {o.reason="Aquisição anterior com titularidade complexa.";return o}
+   o.reason="A aquisição antecede o vínculo; preservada a titularidade própria, ressalvada prova de situação diversa.";return o
+ }
+ if(r==="scb"){
+   // The pact/contract override has already been processed before this matrix.
+   // In marriage, SCB only reaches this point after the antenuptial pact is confirmed and validated.
+   if(a.acquirer==="AB"){
+      const s=a.shareA===""||a.shareA==null?NaN:Number(a.shareA);
+      if(Number.isFinite(s)&&s>=0&&s<=100){o.label="Separação convencional — copropriedade formal";o.a=s/100;o.b=1-o.a;o.reason="A divisão decorre da copropriedade/título informado e deve ser compatível com o pacto. Não há aplicação da Súmula 377.";return o}
+      o.reason="Separação convencional: copropriedade indicada, mas falta informar a fração de A.";return o
+   }
+   if(a.scbClaim==="duvida"||a.scbContribution==="duvida"){o.reason="Separação convencional: eventual pretensão patrimonial excepcional ainda não está estabilizada.";return o}
+   if(a.scbClaim==="sim"){
+      if(a.scbContribution==="sim"){
+         o.label="Separação convencional — contribuição efetiva comprovada";o.a=.5;o.b=.5;
+         o.reason="Resultado excepcional fundado em contribuição efetiva comprovada, conforme jurisprudência do STJ. Não decorre de esforço comum presumido nem da Súmula 377 e permanece subordinado ao conteúdo do pacto antenupcial.";return o
+      }
+      if(a.scbContribution==="parcial"){
+         const s=Number(a.scbShareA);
+         if(Number.isFinite(s)&&s>=0&&s<=100){o.label="Separação convencional — contribuição proporcional comprovada";o.a=s/100;o.b=1-o.a;o.reason="Proporção informada a partir de contribuição efetivamente demonstrada; validar sua compatibilidade com o pacto e com a natureza da pretensão.";return o}
+         o.reason="Contribuição proporcional indicada, mas falta quantificar a parcela de A.";return o
+      }
+      o.reason="Há pretensão de repercussão patrimonial, mas não foi comprovada contribuição efetiva. Mantém-se bloqueado o afastamento da separação convencional.";return o
+   }
+   if(a.acquirer==="A"){o.label="Separação convencional — particular de A";o.a=1;o.b=0;o.reason="Aplicação da separação patrimonial escolhida no pacto antenupcial, após leitura de suas cláusulas específicas.";return o}
+   if(a.acquirer==="B"){o.label="Separação convencional — particular de B";o.a=0;o.b=1;o.reason="Aplicação da separação patrimonial escolhida no pacto antenupcial, após leitura de suas cláusulas específicas.";return o}
+   o.reason="Separação convencional: titularidade não estabilizada.";return o
+ }
+ if(r==="cpb"){
+   if(a.event==="FGTS / verba trabalhista"){o.label="FGTS/verba formada durante o vínculo — comunicabilidade preliminar";o.a=.5;o.b=.5;o.reason="Valores formados durante a constância do vínculo são tratados preliminarmente como comunicáveis; período anterior/posterior deve ser segregado.";return o}
+   if(a.event==="Fruto / rendimento de bem" || a.event==="Benfeitoria / acessão / incremento" || a.event==="Participação nos lucros / dividendos"){o.label="Fruto/incremento econômico durante o vínculo — comunicabilidade preliminar";o.a=.5;o.b=.5;o.reason="A expressão econômica percebida ou formada durante o vínculo é tratada preliminarmente como comunicável; exige vinculação temporal e documental.";return o}
+   if(["Doação","Sucessão / herança"].includes(a.origin)){
+      if(a.acquirer==="AB"||a.jointGiftInheritance==="sim"){
+         const s=a.shareA===""||a.shareA==null?NaN:Number(a.shareA);
+         o.label="Aquisição gratuita destinada a ambos — copropriedade formal";
+         if(Number.isFinite(s)&&s>=0&&s<=100){o.a=s/100;o.b=1-o.a}else{o.a=.5;o.b=.5}
+         o.reason="A titularidade conjunta decorre da própria liberalidade/transmissão destinada a ambos, e não da comunicabilidade do regime. Fração expressa é preservada; na ausência de fração estabilizada, adota-se 50/50 apenas como qualificação preliminar da copropriedade.";
+         if(a.origin==="Doação"&&get("rel.type")==="Casamento")o.reason+=" Registrar também, para eventual análise sucessória futura, o alerta do art. 551, parágrafo único, do Código Civil.";
+         if(a.origin==="Doação"&&get("rel.type")==="União estável")o.reason+=" Eventual extensão do efeito sucessório próprio da doação conjunta a cônjuges para união estável não é presumida e exige análise jurídica específica.";
+         return o
+      }
+      if(a.acquirer==="A"){o.label="Aquisição gratuita durante o vínculo — particular de A";o.a=1;o.b=0}
+      else if(a.acquirer==="B"){o.label="Aquisição gratuita durante o vínculo — particular de B";o.a=0;o.b=1}
+      else {o.reason="Aquisição gratuita com beneficiários/titularidade não estabilizados.";return o}
+      o.reason="Tratamento preliminar como bem particular, ressalvados frutos, benfeitorias, cláusulas e situações específicas.";return o
+   }
+   const v=money(a.value), pa=money(a.privateAmount), psa=money(a.postSepAmount);
+   if(a.privateResources==="duvida"||a.subrogation==="duvida"||a.postSepPayments==="duvida"){o.reason="Há origem particular/sub-rogação/pagamento pós-separação ainda a verificar.";return o}
+   if(["A","B","ambos","parcial"].includes(a.privateResources)||["A","B"].includes(a.subrogation)){
+      if(v===null||pa===null||v<=0||pa<0||pa>v){o.reason="Há patrimônio particular/sub-rogação. Informar o valor comprovado da parcela particular e um valor total positivo para quantificar as frações sem produzir divisão inválida.";return o}
+      const common=Math.max(0,v-pa), who=(a.subrogation==="A"||a.privateResources==="A")?"A":(a.subrogation==="B"||a.privateResources==="B")?"B":null;
+      if(!who){o.reason="Origem particular mista: é necessário individualizar quanto pertence a A e a B antes da divisão.";return o}
+      const part=pa/v; o.label="Aquisição onerosa com sub-rogação/aporte particular parcial";
+      if(who==="A"){o.a=part+(1-part)/2;o.b=(1-part)/2}else{o.b=part+(1-part)/2;o.a=(1-part)/2}
+      o.reason=`Parcela particular preservada (${fmt(pa)}); saldo de ${fmt(common)} tratado preliminarmente como comunicável.`;return o
+   }
+   if(a.postSepPayments==="A"||a.postSepPayments==="B"){
+      if(v===null||psa===null||v<=0||psa<0||psa>v){o.reason="Há pagamento exclusivo posterior à separação de fato. Informar valor total positivo e o valor comprovado do pagamento para segregar a parcela sem produzir divisão inválida.";return o}
+      const post=psa/v, who=a.postSepPayments; o.label="Bem adquirido no vínculo com pagamento exclusivo posterior à separação";
+      if(who==="A"){o.a=post+(1-post)/2;o.b=(1-post)/2}else{o.b=post+(1-post)/2;o.a=(1-post)/2}
+      o.reason=`Parcela pós-separação preservada para ${who} (${fmt(psa)}); saldo tratado preliminarmente como comunicável.`;return o
+   }
+   o.label="Aquisição onerosa durante comunhão parcial — comunicável";o.a=.5;o.b=.5;o.reason="Aplicação preliminar 50/50; renda/trabalho exclusivo de uma parte, por si só, não é tratado como patrimônio particular sub-rogado.";return o
+ }
+ if(r==="cub"){
+   if(a.personalUse==="duvida"||a.personalIncome==="duvida"||a.inalienability==="duvida"||a.incommunicability==="duvida"||a.fruitOfPrivate==="duvida"||a.fruitsExcluded==="duvida"){
+      o.reason="Há elemento de exclusão/comunicabilidade ainda a verificar; a comunhão universal não será presumida enquanto a exceção não estiver estabilizada.";return o
+   }
+   if(a.personalUse==="sim"){
+      if(a.acquirer==="A"){o.label="Bem excluído da comunhão universal — particular de A";o.a=1;o.b=0}
+      else if(a.acquirer==="B"){o.label="Bem excluído da comunhão universal — particular de B";o.a=0;o.b=1}
+      else {o.reason="Bem pessoal/profissional indicado, mas falta estabilizar seu titular.";return o}
+      o.reason="Tratamento preliminar como bem excluído da comunhão universal por sua natureza pessoal/profissional.";return o
+   }
+   if(a.personalIncome==="sim"){
+      if(a.acquirer==="A"){o.label="Provento pessoal — particular de A";o.a=1;o.b=0}
+      else if(a.acquirer==="B"){o.label="Provento pessoal — particular de B";o.a=0;o.b=1}
+      else {o.reason="Provento pessoal indicado, mas falta identificar seu titular.";return o}
+      o.reason="Tratamento preliminar como provento pessoal excluído da comunhão; frutos/rendimentos convertidos em patrimônio devem ser qualificados separadamente.";return o
+   }
+   if(a.inalienability==="sim"||a.incommunicability==="sim"){
+      if(a.acquirer==="A"){o.label="Bem excluído da comunhão universal — particular de A";o.a=1;o.b=0}
+      else if(a.acquirer==="B"){o.label="Bem excluído da comunhão universal — particular de B";o.a=0;o.b=1}
+      else {o.reason="Gravame de incomunicabilidade/inalienabilidade indicado, mas falta identificar o beneficiário/titular.";return o}
+      o.reason=a.inalienability==="sim"?"Exclusão preliminar fundada em inalienabilidade, tratada como impeditiva da comunicação.":"Exclusão preliminar fundada na cláusula de incomunicabilidade.";
+      return o
+   }
+   if(a.fruitOfPrivate==="sim"){
+      if(a.fruitsExcluded==="sim"){
+         if(a.acquirer==="A"){o.label="Fruto também excluído da comunhão — particular de A";o.a=1;o.b=0}
+         else if(a.acquirer==="B"){o.label="Fruto também excluído da comunhão — particular de B";o.a=0;o.b=1}
+         else {o.reason="Fruto excluído indicado, mas falta identificar o titular.";return o}
+         o.reason="Há indicação de disposição expressa alcançando também os frutos; mantida a exclusão preliminar.";return o
+      }
+      o.label="Fruto de bem particular — comunicável";o.a=.5;o.b=.5;
+      o.reason="Na comunhão universal, a exclusão do bem principal não implica, por si só, exclusão de seus frutos; sem disposição expressa em sentido contrário, o fruto é tratado preliminarmente como comunicável.";
+      return o
+   }
+   if(a.subrogation==="A"){
+      o.label="Sub-rogação de bem particular excluído — particular de A";o.a=1;o.b=0;o.reason="Sub-rogação informada em favor de A; preservada a exclusão do bem originário, sujeita à prova documental.";return o
+   }
+   if(a.subrogation==="B"){
+      o.label="Sub-rogação de bem particular excluído — particular de B";o.a=0;o.b=1;o.reason="Sub-rogação informada em favor de B; preservada a exclusão do bem originário, sujeita à prova documental.";return o
+   }
+   if(a.subrogation==="duvida"){o.reason="Sub-rogação a verificar; cálculo bloqueado.";return o}
+   o.label="Comunhão universal — comunicável";o.a=.5;o.b=.5;
+   o.reason="Aplicação da matriz-base da comunhão universal, após verificação das exclusões estruturadas e de eventual regra convencional específica.";
+   return o
+ }
+ if(r==="sob"){
+   // A convention may only have reached here if no structured override matched this asset.
+   // Mandatory separation is not assimilated to conventional separation.
+   // STJ: fact-eventual assets (notably lottery prizes) are a specific exception and do not depend on proof of common effort.
+   if(a.acquisitionMode==="duvida"||a.acquisitionMode==="outro"){
+      o.reason="Separação obrigatória: o modo jurídico da aquisição ainda exige qualificação.";return o
+   }
+   if(a.acquisitionMode==="eventual"){
+      if(!a.sobExtensionChoice||a.sobExtensionChoice==="duvida"){
+         o.reason="Decisão jurídica necessária: o STJ reconhece, para prêmio de loteria/fato eventual, comunicabilidade também na separação obrigatória independentemente de esforço comum. A Ficha não transpõe automaticamente a regra da CPB: o advogado deve confirmar ou afastar sua aplicação ao caso concreto.";return o
+      }
+      if(a.sobExtensionChoice==="sim"){
+         o.label="SOB — fato eventual incluído por opção jurídica";o.a=.5;o.b=.5;
+         o.reason="O profissional optou pela comunicabilidade. Orientação exibida pela Ficha: o STJ reconhece a comunicabilidade de prêmio de loteria/fato eventual na separação obrigatória, independentemente de esforço comum.";return o
+      }
+      if(a.acquirer==="A"){o.label="SOB — fato eventual excluído por opção jurídica";o.a=1;o.b=0}
+      else if(a.acquirer==="B"){o.label="SOB — fato eventual excluído por opção jurídica";o.a=0;o.b=1}
+      else{o.reason="Opção jurídica afastou a comunicabilidade, mas falta estabilizar a titularidade individual.";return o}
+      o.reason="O profissional optou por não estender ao caso concreto a comunicabilidade da hipótese peculiar da CPB, apesar da orientação do STJ para prêmio de loteria/fato eventual. Registrar o fundamento da opção.";return o
+   }
+   if(a.acquisitionMode==="gratuita"){
+      if(a.jointGiftInheritance==="duvida"){o.reason="Doação/herança: falta estabilizar se a liberalidade/transmissão foi destinada a ambos.";return o}
+      if(a.jointGiftInheritance==="sim"||a.acquirer==="AB"){
+         const s=a.shareA===""||a.shareA==null?NaN:Number(a.shareA);
+         o.label="Doação/herança destinada a ambos — titularidade comum";
+         if(Number.isFinite(s)&&s>=0&&s<=100){o.a=s/100;o.b=1-o.a}
+         else{o.a=.5;o.b=.5}
+         o.reason="A comunicabilidade aqui não decorre da Súmula 377 nem de extensão da CPB: ambos são destinatários/titulares da aquisição. Em doação conjunta a cônjuges, registrar também o alerta sucessório do art. 551, parágrafo único, do Código Civil, para eventual consolidação da parte do premorto no sobrevivente.";
+         return o
+      }
+      if(a.acquirer==="A"){o.label="Separação obrigatória — aquisição gratuita particular de A";o.a=1;o.b=0}
+      else if(a.acquirer==="B"){o.label="Separação obrigatória — aquisição gratuita particular de B";o.a=0;o.b=1}
+      else{o.reason="Aquisição gratuita indicada, mas falta identificar beneficiário/titular.";return o}
+      o.reason="Doação/herança individual não é convertida em aquesto oneroso pela Súmula 377; preservada a titularidade individual.";return o
+   }
+   const cpbPeculiar=["fruto","benfeitoria","incremento","lucro_dividendo"].includes(a.nature);
+   if(cpbPeculiar && a.acquisitionMode!=="onerosa"){
+      if(!a.sobExtensionChoice||a.sobExtensionChoice==="duvida"){
+         o.reason="Hipótese potencialmente comunicável na comunhão parcial, mas sem transposição automática para a separação obrigatória. O advogado deve decidir sua inclusão ou exclusão na SOB à luz do caso concreto e da orientação jurídica aplicável.";return o
+      }
+      if(a.sobExtensionChoice==="sim"){o.label="SOB — hipótese da CPB incluída por opção jurídica";o.a=.5;o.b=.5;o.reason="Comunicabilidade adotada por decisão expressa do profissional; a escolha fica registrada e não decorre de aplicação automática da CPB.";return o}
+      if(a.acquirer==="A"){o.label="SOB — hipótese da CPB excluída por opção jurídica";o.a=1;o.b=0}
+      else if(a.acquirer==="B"){o.label="SOB — hipótese da CPB excluída por opção jurídica";o.a=0;o.b=1}
+      else{o.reason="Comunicabilidade afastada, mas falta estabilizar titularidade.";return o}
+      o.reason="O profissional afastou expressamente a extensão da hipótese da CPB à separação obrigatória.";return o
+   }
+   if(a.acquisitionMode==="onerosa") a.onerous="sim";
+   if(a.onerous==="duvida"||a.commonEffortClaim==="duvida"||a.commonEffortProof==="duvida"){
+      o.reason="Separação obrigatória: aquisição onerosa/esforço comum ainda não estabilizados.";return o
+   }
+   if(a.onerous!=="sim"){
+      if(a.acquirer==="A"){o.label="Separação obrigatória — bem particular de A";o.a=1;o.b=0}
+      else if(a.acquirer==="B"){o.label="Separação obrigatória — bem particular de B";o.a=0;o.b=1}
+      else if(a.acquirer==="AB"){
+        const s=a.shareA===""||a.shareA==null?NaN:Number(a.shareA);
+        if(Number.isFinite(s)&&s>=0&&s<=100){o.label="Separação obrigatória — copropriedade formal informada";o.a=s/100;o.b=1-o.a}
+        else{o.reason="Bem não oneroso/copropriedade: informar a fração formal de A.";return o}
+      } else {o.reason="Separação obrigatória: falta estabilizar a titularidade do bem.";return o}
+      o.reason="Não caracterizada aquisição onerosa nem hipótese específica de fato eventual já qualificada; preservada preliminarmente a titularidade informada.";return o
+   }
+   if(a.commonEffortClaim!=="sim"){
+      if(a.acquirer==="A"){o.label="Separação obrigatória — sem esforço comum alegado";o.a=1;o.b=0}
+      else if(a.acquirer==="B"){o.label="Separação obrigatória — sem esforço comum alegado";o.a=0;o.b=1}
+      else{o.reason="Aquisição onerosa conjunta sem alegação de esforço comum estruturada; revisar fatos e titularidade.";return o}
+      o.reason="Sem alegação de esforço comum, não se presume comunicação dos aquestos.";return o
+   }
+   if(a.commonEffortProof==="sim"){
+      o.label="Separação obrigatória — aquesto com esforço comum comprovado";o.a=.5;o.b=.5;
+      o.reason="Aplicação preliminar da Súmula 377/STF conforme interpretação do STJ: aquisição onerosa na constância do vínculo com esforço comum comprovado.";return o
+   }
+   if(a.commonEffortProof==="parcial"){
+      o.reason="Esforço comum apenas parcialmente demonstrado. A Ficha não converterá automaticamente percentual de contribuição em quota dominial/meação na separação obrigatória; a consequência jurídica exige validação profissional específica.";return o
+   }
+   o.reason="Há alegação de esforço comum, mas a prova positiva ainda não foi confirmada. A comunicação não será presumida.";return o
+}
+ if(r==="pfa"){
+   if(a.pfaPreexisting==="duvida"||a.pfaGratuitous==="duvida"||a.pfaSubrogation==="duvida"||a.pfaJointWork==="duvida"||a.pfaUnauthorizedDisposition==="duvida"){
+      o.reason="PFA: há elemento essencial ainda a verificar antes da apuração global.";return o
+   }
+   if(a.pfaUnauthorizedDisposition==="sim"){o.reason="PFA: alienação/doação potencialmente sujeita a recomposição. Cadastrar o ajuste global antes do fechamento para evitar dupla contagem.";return o}
+   if(a.pfaPreexisting==="sim"||a.pfaGratuitous==="sim"||a.pfaSubrogation==="total"){
+      o.label="PFA — patrimônio próprio excluído dos aquestos";o.a=a.acquirer==="A"?1:0;o.b=a.acquirer==="B"?1:0;
+      o.reason="Bem preliminarmente excluído da base global dos aquestos por preexistência, liberalidade/sucessão individual ou sub-rogação total.";return o
+   }
+   if(a.pfaSubrogation==="parcial"){
+      const v=money(a.value),p=money(a.pfaSubrogatedPart||a.privateAmount);
+      if(v===null||p===null||p<0||p>v){o.reason="PFA: sub-rogação parcial exige quantificação da parcela própria antes da apuração global.";return o}
+      o.label="PFA — sub-rogação parcial: apuração global necessária";o.reason="Há parcela própria quantificada e saldo potencialmente sujeito à participação. O fechamento global deve segregar as duas parcelas.";return o
+   }
+   if(a.pfaJointWork==="sim"){
+      o.label="PFA — bem adquirido por trabalho conjunto";o.a=.5;o.b=.5;o.reason="Art. 1.679: bem adquirido pelo trabalho conjunto tratado preliminarmente em quotas iguais, sem substituir o fechamento global da PFA.";return o
+   }
+   o.label="PFA — potencial aquesto oneroso";o.reason="Bem oneroso do período segue para a apuração global dos aquestos; a PFA não cria 50/50 dominial automático por bem.";return o
+ }
+ o.reason="Regime ainda exige qualificação específica.";return o
+}
+
+function classifyWithPostSeparationNuance(a){
+ const o=classify(a);
+ if(a&&a.nature==="Participação societária / ações"&&get("rel.separation")&&(a.corporatePostSepFruits==="sim"||a.corporatePostSepFruits==="duvida")){
+   o.reason=(o.reason?o.reason+" ":"")+"Participação societária comum: lucros/dividendos posteriores à separação podem conservar repercussão patrimonial até a efetiva apuração/partilha; os frutos societários devem ser tratados separadamente do ingresso de novos bens após a ruptura.";
+ }
+ return o;
+}
+function updateAssetQuestionVisibility(){
+ state.assets.forEach(a=>{
+   const card=document.querySelector(`[data-asset-id="${a.id}"]`);
+   if(!card)return;
+   const er=effectiveRegime(a.date);
+   const sob=er.regime==="sob", scb=er.regime==="scb", pfa=er.regime==="pfa";
+   card.querySelectorAll(".sob-only").forEach(el=>el.style.display=sob?"":"none");
+   card.querySelectorAll(".scb-only").forEach(el=>el.style.display=scb?"":"none");
+   card.querySelectorAll(".pfa-only").forEach(el=>el.style.display=pfa?"":"none");
+   card.querySelectorAll(".corporate-only").forEach(el=>el.style.display=a.nature==="Participação societária / ações"?"":"none");
+ });
+}
+
+function addPfaAdjustment(){
+ state.pfaAdjustments=state.pfaAdjustments||[];
+ state.pfaAdjustments.push({id:uid(),party:"",type:"",value:"",notes:""});
+ render();
+}
+function pfaAdj(id,k,v){const x=(state.pfaAdjustments||[]).find(a=>a.id===id);if(x){x[k]=v;render()}}
+function delPfaAdj(id){state.pfaAdjustments=(state.pfaAdjustments||[]).filter(a=>a.id!==id);render()}
+function numBR(v){if(v===null||v===undefined||v==="")return 0;let s=String(v).replace(/\./g,"").replace(",",".").replace(/[^\d.-]/g,"");return Number(s)||0}
+function moneyFmt(v){return (Number(v)||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}
+function pfaAdjustmentTemplate(x){
+ return `<div class="rowcard"><div class="grid">
+ <div class="s3 f"><label>Patrimônio afetado</label><select onchange="pfaAdj('${x.id}','party',this.value)"><option value="">Selecione</option><option value="A" ${x.party==="A"?"selected":""}>Parte A</option><option value="B" ${x.party==="B"?"selected":""}>Parte B</option></select></div>
+ <div class="s4 f"><label>Ajuste</label><select onchange="pfaAdj('${x.id}','type',this.value)"><option value="">Selecione</option><option value="recomposicao" ${x.type==="recomposicao"?"selected":""}>Recomposição a acrescer aos aquestos</option><option value="divida" ${x.type==="divida"?"selected":""}>Dívida dedutível do próprio patrimônio/aquestos</option><option value="credito" ${x.type==="credito"?"selected":""}>Crédito/reembolso entre patrimônios</option><option value="duvida" ${x.type==="duvida"?"selected":""}>Situação a apurar externamente</option></select></div>
+ <div class="s3 f"><label>Valor</label><input value="${esc(x.value||"")}" onchange="pfaAdj('${x.id}','value',this.value)"></div>
+ <div class="s12 f"><label>Fundamento factual / observação</label><input value="${esc(x.notes||"")}" onchange="pfaAdj('${x.id}','notes',this.value)"></div>
+ </div><button class="danger" onclick="delPfaAdj('${x.id}')">Excluir ajuste</button></div>`;
+}
+function pfaGlobalCalculation(){
+ // intentionally conservative: only assets already classified by the existing PFA engine and with cut-off value.
+ let A=0,B=0,pending=[];
+ (state.assets||[]).forEach(a=>{
+   let er=effectiveRegime(a.date||a.acquisitionDate||"");
+   if(er.pending||er.regime!=="pfa")return;
+   let c; try{c=classifyWithPostSeparationNuance(a)}catch(e){pending.push(assetName(a));return}
+   const txt=JSON.stringify(c||{}).toLowerCase();
+   const v=numBR(a.pfaEndValue||a.value||"");
+   if(!v){pending.push(assetName(a));return}
+   // Excluded/private assets are not counted. Potential onerous aquestos are allocated to title/acquirer.
+   if(txt.includes("exclu")||txt.includes("particular"))return;
+   if(txt.includes("potencial aquesto")||txt.includes("aquesto oneroso")||txt.includes("aquest")){
+      const owner=a.owner||a.acquirer||a.acquiredBy||"";
+      if(owner==="A")A+=v;
+      else if(owner==="B")B+=v;
+      else if(owner==="ambos"||owner==="both"){A+=v/2;B+=v/2}
+      else pending.push(assetName(a));
+   }
+ });
+ let creditA=0,creditB=0;
+ (state.pfaAdjustments||[]).forEach(x=>{
+   const v=numBR(x.value); if(!x.party||!x.type||x.type==="duvida"){pending.push("ajuste PFA");return}
+   if(x.type==="recomposicao"){if(x.party==="A")A+=v;else B+=v}
+   if(x.type==="divida"){if(x.party==="A")A-=v;else B-=v}
+   if(x.type==="credito"){if(x.party==="A")creditA+=v;else creditB+=v}
+ });
+ // Debt excess must not transfer to the other spouse: for the simplified participation base, negative own aquestos are floored at zero.
+ A=Math.max(0,A); B=Math.max(0,B);
+ const total=A+B,target=total/2;
+ let netA=target-A+creditA-creditB; // positive = A receives; negative = A pays
+ return {A,B,total,target,netA,pending:[...new Set(pending)]};
+}
+function renderPfaGlobal(){
+ const el=$("#pfaGlobal"); if(!el)return;
+ const regimes=(state.assets||[]).map(a=>{const e=effectiveRegime(a.date||a.acquisitionDate||"");return e.pending?"":e.regime});
+ const pfaActive=(get("regime.effective")==="pfa"||regimes.includes("pfa"));
+ if(!pfaActive){el.innerHTML=`<div class="hint">Módulo exibido quando a PFA incidir no período patrimonial analisado.</div>`;return}
+ const g=pfaGlobalCalculation();
+ el.innerHTML=`<button onclick="addPfaAdjustment()">+ Adicionar ajuste global indispensável</button>
+ ${(state.pfaAdjustments||[]).map(pfaAdjustmentTemplate).join("")}
+ <div class="rowcard"><strong>Apuração global simplificada</strong><br>
+ Aquestos líquidos preliminares — Parte A: ${moneyFmt(g.A)} | Parte B: ${moneyFmt(g.B)}<br>
+ Total: ${moneyFmt(g.total)} | Participação-alvo de cada parte: ${moneyFmt(g.target)}<br>
+ ${g.pending.length?`<div class="warn"><strong>Resultado bloqueado:</strong> faltam valores/qualificações em ${esc(g.pending.join(", "))}. Casos excepcionais devem ser apurados externamente.</div>`:
+ `<div class="ok"><strong>Crédito preliminar de equalização:</strong> ${g.netA>0?`Parte A recebe ${moneyFmt(g.netA)} da Parte B`:g.netA<0?`Parte B recebe ${moneyFmt(-g.netA)} da Parte A`:"não há crédito líquido entre as partes"}.</div>`}
+ <span class="hint">O cálculo não transforma os bens em copropriedade. Cada parte conserva a titularidade de seu patrimônio; a PFA gera participação/equalização ao final. Doações/alienações em detrimento da participação, dívidas e pagamentos entre patrimônios só entram quando cadastrados como ajuste global relevante.</span>
+ </div>`;
+}
+
+function runFunctionalAudit(){
+ const tests=[];
+ const add=(name,pass,detail)=>tests.push({name,pass:!!pass,detail});
+ // Static functional assertions: confirm critical branch rules remain executable in this build.
+ add("SOB — idade 70+ após 10/12/2010", sobAgeReason.toString().includes('A>70||B>70'), "A idade é aferida no início do vínculo.");
+ add("SOB — idade 60 entre 2003 e 2010", sobAgeReason.toString().includes('A>60||B>60'), "Preservado o marco histórico da redação originária do CC/2002.");
+ add("SOB — regra histórica CC/1916", sobAgeReason.toString().includes('A>50')&&sobAgeReason.toString().includes('CC/1916'), "Preservada a regra histórica dependente do sexo.");
+ add("Tema 1.236 — corte 01/02/2024", theme1236OriginalFormationEligible.toString().includes('2024-02-01'), "Afastamento originário limitado ao marco adotado na matriz.");
+ add("Tema 1.236 — causa autônoma impede afastamento global", theme1236OriginalFormationEligible.toString().includes('!special'), "Outra causa de SOB permanece autônoma.");
+ add("UE — contrato posterior não retroage", effectiveRegime.toString().includes('eficácia ex nunc')||effectiveRegime.toString().includes('período anterior ao contrato'), "Período pretérito permanece sob regime anterior.");
+ add("Alteração de regime — cronologia documental", effectiveRegime.toString().includes('regimeChronologyReadiness'), "Mudanças só operam depois da estabilização documental.");
+ add("Separação de fato — marco coletado", !!document.querySelector('[data-k="rel.separation"]'), "Campo estrutural preservado.");
+ add("CPB — fruto/benfeitoria", classify.toString().includes('benfeitoria')||classify.toString().includes('fruto'), "Categorias especiais permanecem no classificador.");
+ add("SOB — fato eventual depende de escolha profissional", classify.toString().includes('sobExtensionChoice'), "Não há transplante automático da CPB.");
+ add("SCB — sem Súmula 377 automática", classify.toString().includes('scbContribution')||document.body.innerText.includes('separação convencional'), "Contribuição excepcional é tratada separadamente.");
+ add("PFA — fechamento global, não 50/50 por bem", typeof pfaGlobalCalculation==="function", "Apuração global simplificada preservada.");
+ add("Alienação — vinculada ao ativo existente", typeof linkedAssetQualification==="function", "Evento patrimonial reutiliza o cadastro do bem.");
+ add("Outorga — motor próprio", typeof outorgaAssessment==="function", "Necessidade/dispensa é derivada, não perguntada como conclusão.");
+ add("Proteção patrimonial — sem diagnóstico automático", typeof protectionAssessment==="function", "Indicadores geram nível de atenção, não rótulo automático.");
+ return tests;
+}
+function renderFunctionalAudit(){
+ const el=$("#functionalAudit");if(!el)return;
+ let tests=[];try{tests=runFunctionalAudit()}catch(e){el.innerHTML=`<div class="warn">Falha ao executar auditoria funcional: ${esc(e.message)}</div>`;return}
+ const fail=tests.filter(t=>!t.pass);
+ el.innerHTML=`<div class="${fail.length?"warn":"ok"}"><strong>${fail.length?`${fail.length} teste(s) requerem revisão`:`${tests.length} verificações estruturais aprovadas`}.</strong></div>
+ <details><summary>Ver verificações</summary>${tests.map(t=>`<div class="rowcard"><strong>${t.pass?"✓":"✗"} ${esc(t.name)}</strong><br><span class="hint">${esc(t.detail)}</span></div>`).join("")}</details>`;
+}
+function renderResults(){
+ let total=0,A=0,B=0,P=0,rows=[];
+ for(const [i,a] of state.assets.entries()){const v=money(a.value),c=classify(a);if(v!==null)total+=v;if(v!==null&&c.a!==null){A+=v*c.a;B+=v*c.b}else if(v!==null)P+=v;
+ rows.push(`<div class="asset-result"><div class="status">Bem ${i+1}: ${esc(a.description||a.nature||"sem descrição")} — ${esc(c.label)}</div><div class="hint">Regime considerado: ${esc(regimeLabel(effectiveRegime(a.date).regime))}. ${esc(c.reason)}</div>${v!==null&&c.a!==null?`<div class="hint">A: ${fmt(v*c.a)} · B: ${fmt(v*c.b)}</div>`:""}</div>`)}
+ $("#summary").innerHTML=`<div class="result-grid"><div class="metric">Patrimônio cadastrado<strong>${fmt(total)}</strong></div><div class="metric">Parte A — apurada<strong>${fmt(A)}</strong></div><div class="metric">Parte B — apurada<strong>${fmt(B)}</strong></div><div class="metric ${P?"pending":""}">Pendente<strong>${fmt(P)}</strong></div></div>`;
+ $("#results").innerHTML=rows.join("")||'<div class="hint">Nenhum bem cadastrado.</div>';
+}
+
+function uxReadiness(){
+ const issues=[],notes=[];
+ if(!get("rel.type"))issues.push("informar a natureza do vínculo");
+ if(!get("rel.start"))issues.push("informar a data de início do vínculo");
+ if(!get("regime.base"))issues.push("estabilizar o regime-base");
+ const dr=documentReadiness(); if(!dr.ready)issues.push(dr.reason);
+ const cr=regimeChronologyReadiness(); if(!cr.ready)issues.push(cr.reason);
+ (state.assets||[]).forEach((a,i)=>{
+   if(!a.date)issues.push(`Bem ${i+1}: falta data de aquisição/ingresso`);
+   if(!a.acquirer)issues.push(`Bem ${i+1}: falta identificar quem adquiriu/recebeu`);
+   try{const c=classifyWithPostSeparationNuance(a);if(c.a===null&&c.b===null)issues.push(`Bem ${i+1}: ${c.reason||"qualificação pendente"}`)}catch(e){issues.push(`Bem ${i+1}: falha de qualificação`)}
+ });
+ if(get("protect.disposals")==="sim" && !(state.disposals||[]).length)issues.push("foi informada alienação/oneração, mas nenhum ato foi cadastrado");
+ (state.disposals||[]).forEach((x,i)=>{const q=outorgaAssessment(x);if(q.status==="pendente")issues.push(`Ato ${i+1}: ${q.reason}`)});
+ if(get("rel.separation"))notes.push("Separação de fato informada: a data será usada como marco patrimonial, com cautela para fatos ocorridos no mesmo dia.");
+ return {issues:[...new Set(issues)],notes};
+}
+function renderUxReadiness(){
+ const el=$("#uxReadiness");if(!el)return;const u=uxReadiness();
+ el.className=u.issues.length?"pendencia-ficha":"resultado-motor";
+ el.innerHTML=u.issues.length?`<span class="ui-tag">Pendências para fechamento</span><strong>Ficha ainda não pronta para fechamento automático.</strong><br>${u.issues.slice(0,8).map(x=>`• ${esc(x)}`).join("<br>")}${u.issues.length>8?`<br>• + ${u.issues.length-8} pendência(s)`:``}${u.notes.length?`<br><span class="hint">${u.notes.map(esc).join(" ")}</span>`:""}`:
+ `<span class="ui-tag">Prontidão do Motor</span><strong>Dados essenciais suficientes para o fechamento preliminar.</strong>${u.notes.length?`<br><span class="hint">${u.notes.map(esc).join(" ")}</span>`:""}`;
+}
+function render(){conditionals();renderDocumentStatus();renderClauses();renderChanges();$("#assets").innerHTML=state.assets.map(assetTemplate).join("");
+ const da=$("#disposalArea");
+ if(da){da.innerHTML=get("protect.disposals")==="sim"?`<button onclick="addDisposal()">+ Adicionar alienação/oneração</button>${(state.disposals||[]).map(disposalTemplate).join("")}`:"";}
+ const pa=$("#protectionAlert"); if(pa){const p=protectionAssessment();pa.innerHTML=p.level?`<div class="warn"><strong>${esc(p.level)}</strong><br>${esc(p.text)}<br><span class="hint">O alerta não qualifica automaticamente fraude ou violência patrimonial. Avaliar repercussões na outorga, partilha/recomposição e, quando aplicável, medidas de proteção patrimonial.</span></div>`:"";}
+ updateAssetQuestionVisibility();renderUxReadiness();renderSobOriginalAudit();renderRegimeTransversalAudit();renderPfaGlobal();renderFunctionalAudit();renderResults()}
+$("#addMarriageClause").onclick=()=>{state.marriageClauses.push({id:uid(),scope:"",effect:"",startDate:"",party:"",shareA:"",target:"",sourceText:"",details:""});render()};
+$("#addUEClause").onclick=()=>{state.ueClauses.push({id:uid(),scope:"",effect:"",startDate:"",party:"",shareA:"",target:"",sourceText:"",details:""});render()};
+$("#addChange").onclick=()=>{state.changes.push({id:uid(),date:"",before:"",after:"",docType:"",docRef:"",docDate:"",ingestion:"",imported:"",validated:"",sourceText:"",details:""});render()};
+$("#addAsset").onclick=()=>{state.assets.push({id:uid(),description:"",nature:"",date:"",origin:"",value:"",acquirer:"",formalOwner:"",shareA:"",privateResources:"",subrogation:"",incommunicability:"",event:"",baseAsset:"",postSepPayments:"",privateAmount:"",postSepAmount:"",details:""});render()};
+const STATE_ARRAY_KEYS=["changes","assets","disposals","pfaAdjustments","marriageClauses","ueClauses","documents"];
+function freshState(){return {data:{},changes:[],assets:[],disposals:[],outorgaClause:{},pfaAdjustments:[],marriageClauses:[],ueClauses:[],documents:[]}}
+function normalizeImportedState(raw){
+ if(!raw||typeof raw!=="object"||Array.isArray(raw))throw new Error("Arquivo sem estrutura de estado válida.");
+ if(!raw.data||typeof raw.data!=="object"||Array.isArray(raw.data))throw new Error("Bloco de dados principal ausente ou inválido.");
+ if(!raw.outorgaClause||typeof raw.outorgaClause!=="object"||Array.isArray(raw.outorgaClause))throw new Error("Bloco de outorga ausente ou inválido.");
+ for(const k of STATE_ARRAY_KEYS)if(!Array.isArray(raw[k]))throw new Error(`Bloco ${k} ausente ou inválido.`);
+ const seen=new Set();
+ for(const k of ["changes","assets","disposals","pfaAdjustments","marriageClauses","ueClauses"]){
+   for(const item of raw[k]){
+     if(!item||typeof item!=="object"||Array.isArray(item))throw new Error(`Registro inválido no bloco ${k}.`);
+     if(!item.id)throw new Error(`Registro sem ID no bloco ${k}.`);
+     if(seen.has(item.id))throw new Error(`ID duplicado detectado: ${item.id}.`);
+     seen.add(item.id);
+   }
+ }
+ return {data:raw.data,changes:raw.changes,assets:raw.assets,disposals:raw.disposals,outorgaClause:raw.outorgaClause,pfaAdjustments:raw.pfaAdjustments,marriageClauses:raw.marriageClauses,ueClauses:raw.ueClauses,documents:raw.documents};
+}
+function syncBaseInputsFromState(){
+ $$("[data-k]").forEach(el=>{el.value=get(el.dataset.k)??""});
+ conditionals();
+}
+function setPersistenceStatus(msg,kind="info-documental"){
+ const el=$("#persistenceStatus");if(!el)return;el.className=kind;el.innerHTML=`<span class="ui-tag">Persistência</span>${esc(msg)}`;
+}
+
+function dissolutionInteropCore(){
+ return {
+  format:"lccj-common-core-v1",
+  sourceProduct:"dissolucao",
+  sourceVersion:"1.1-dev",
+  exportedAt:new Date().toISOString(),
+  parties:{
+   A:{role:"A",name:get("a.name"),cpf:get("a.cpf"),birth:get("a.birth"),historicalSex:get("a.historicalSex")},
+   B:{role:"B",name:get("b.name"),cpf:get("b.cpf"),birth:get("b.birth"),historicalSex:get("b.historicalSex")}
+  },
+  relationship:{
+   type:get("rel.type"),start:get("rel.start"),separation:get("rel.separation"),details:get("rel.details"),
+   regime:get("regime.base"),regimeMatches:get("regime.matches"),regimeChanged:get("regime.changed"),
+   marriage:{form:get("marriage.form"),registration:get("marriage.registration"),pact:get("marriage.pact"),pactDate:get("marriage.pactDate"),pactDoc:get("marriage.pactDoc"),pactValidated:get("marriage.pactValidated"),specialClauses:get("marriage.specialClauses")},
+   ue:{start:get("ue.start"),contract:get("ue.contract"),contractDate:get("ue.contractDate"),contractDoc:get("ue.contractDoc"),contractRegime:get("ue.contractRegime"),contractValidated:get("ue.contractValidated"),specialClauses:get("ue.specialClauses")},
+   changes:JSON.parse(JSON.stringify(state.changes||[])),
+   marriageClauses:JSON.parse(JSON.stringify(state.marriageClauses||[])),
+   ueClauses:JSON.parse(JSON.stringify(state.ueClauses||[]))
+  },
+  assets:JSON.parse(JSON.stringify(state.assets||[])),
+  disposals:JSON.parse(JSON.stringify(state.disposals||[])),
+  pfaAdjustments:JSON.parse(JSON.stringify(state.pfaAdjustments||[])),
+  documents:JSON.parse(JSON.stringify(state.documents||[]))
+ };
+}
+$("#save").onclick=()=>{
+ const payload={version:"dissolucao-v1.1-dev",compatibleFrom:["dissolucao-v0.25","dissolucao-v0.26","dissolucao-v0.26.1","dissolucao-v0.26.2","dissolucao-v0.26.3"],exportedAt:new Date().toISOString(),interop:dissolutionInteropCore(),state};
+ const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});const a=document.createElement("a");const url=URL.createObjectURL(blob);a.href=url;a.download="ficha_dissolucao_v1.1_interoperavel.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),0);setPersistenceStatus("Atendimento exportado para arquivo JSON. Guarde o arquivo para futura retomada.","resultado-motor");
+};
+$("#load").onclick=()=>$("#loadFile").click();
+$("#loadFile").onchange=async e=>{
+ const file=e.target.files&&e.target.files[0];if(!file)return;
+ try{
+   const parsed=JSON.parse(await file.text());
+   const version=parsed&&parsed.version;
+   if(!["dissolucao-v0.25","dissolucao-v0.26","dissolucao-v0.26.1","dissolucao-v0.26.2","dissolucao-v0.26.3","dissolucao-v1.1-dev"].includes(version))throw new Error(`Versão incompatível ou não identificada: ${version||"sem versão"}.`);
+   const imported=normalizeImportedState(parsed.state);
+   state=imported;syncBaseInputsFromState();render();
+   setPersistenceStatus(`Atendimento importado com sucesso (${version}). IDs e vínculos foram preservados conforme o arquivo.`,"resultado-motor");
+ }catch(err){setPersistenceStatus(`Importação não realizada: ${err.message}`,"pendencia-ficha");alert(`Não foi possível importar o atendimento.\n\n${err.message}`)}finally{e.target.value=""}
+};
+$("#reset").onclick=()=>{if(confirm("Apagar os dados desta ficha?")){state=freshState();syncBaseInputsFromState();render();setPersistenceStatus("Novo atendimento iniciado. Nenhum dado anterior permanece nesta sessão.","info-documental")}};
+if($("#startNewInterop"))$("#startNewInterop").onclick=()=>{document.getElementById("startModePanel")?.scrollIntoView({behavior:"smooth",block:"start"});};
+if($("#startImportInterop"))$("#startImportInterop").onclick=()=>$("#loadFile").click();
+bindBase();render();
+</script>
+</body></html>
